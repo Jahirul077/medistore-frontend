@@ -6,6 +6,9 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    unoptimized: true,
+  },
   /* Turbopack root — must be absolute (Next.js 15+ / 16) */
   turbopack: {
     root: path.resolve(__dirname),

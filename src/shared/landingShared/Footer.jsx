@@ -2,11 +2,12 @@ import React from "react";
 import Link from "next/link";
 import { Activity, Mail, Phone } from "lucide-react";
 import Button from "@/components/common/Button";
+import Container from "@/components/common/Container";
 
 export default function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-400 pt-16 pb-8 border-t border-slate-800">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <Container>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
           
           {/* Company Brand Column */}
@@ -129,7 +130,7 @@ export default function Footer() {
           </div>
         </div>
 
-      </div>
+      </Container>
     </footer>
   );
 }

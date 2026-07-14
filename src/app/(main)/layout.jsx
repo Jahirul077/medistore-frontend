@@ -5,7 +5,7 @@ export default function MainLayout({ children }) {
   return (
     <div className="main-layout flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow">
+      <main className="grow">
         {children}
       </main>
       <Footer />

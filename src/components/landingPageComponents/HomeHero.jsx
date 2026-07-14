@@ -3,22 +3,23 @@ import Button from "../common/Button";
 import { Search, ShieldCheck, Clock, Truck, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Reveal from "../common/Reveal";
+import Container from "../common/Container";
 
 export default function HomeHero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-teal-50/50 via-white to-slate-50/30 pt-24 pb-16 lg:pt-32 lg:pb-24 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <section className="relative overflow-hidden bg-linear-to-b from-teal-50/50 via-white to-slate-50/30 pt-24 pb-16 lg:pt-32 lg:pb-24 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Background Decorative Blobs */}
       <div className="absolute top-0 left-1/4 -z-10 h-72 w-72 rounded-full bg-emerald-100/40 blur-3xl dark:bg-emerald-950/20" />
       <div className="absolute right-10 top-1/3 -z-10 h-96 w-96 rounded-full bg-teal-100/30 blur-3xl dark:bg-teal-900/10" />
 
-      <div className="container mx-auto px-4 max-w-7xl">
+      <Container>
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
           {/* Left Text Content */}
           <div className="space-y-8 lg:col-span-7">
             {/* Trust Badge */}
             <Reveal variant="fade-down" delay={100} duration={600}>
-              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-xs font-semibold text-emerald-700 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/30 animate-pulse">
-                <ShieldCheck className="h-4 w-4" />
+              <div className="inline-flex items-center gap-2.5 rounded-full bg-emerald-50 px-5 py-2 text-base font-semibold text-emerald-700 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/30 animate-pulse">
+                <ShieldCheck className="h-5 w-5" />
                 <span>100% Genuine Medicines & Healthcare Essentials</span>
               </div>
             </Reveal>
@@ -27,7 +28,7 @@ export default function HomeHero() {
             <Reveal variant="fade-up" delay={200} duration={800}>
               <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl md:text-6xl dark:text-white leading-tight">
                 Your Trusted Pharmacy,{" "}
-                <span className="bg-gradient-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-emerald-500 to-teal-600 bg-clip-text text-transparent">
                   Delivered in Minutes.
                 </span>
               </h1>
@@ -58,34 +59,34 @@ export default function HomeHero() {
             </Reveal>
 
             {/* Features Row */}
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800/80">
-              <Reveal variant="fade-up" delay={650} duration={700} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-950/40 dark:text-teal-400">
-                  <Truck className="h-5 w-5" />
+            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-slate-100 dark:border-slate-800/80">
+              <Reveal variant="fade-up" delay={650} duration={700} className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-950/40 dark:text-teal-400">
+                  <Truck className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-950 dark:text-white">Free Delivery</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Orders above $40</p>
+                  <h4 className="text-base font-bold text-slate-950 dark:text-white">Free Delivery</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Orders above $40</p>
                 </div>
               </Reveal>
 
-              <Reveal variant="fade-up" delay={750} duration={700} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                  <Clock className="h-5 w-5" />
+              <Reveal variant="fade-up" delay={750} duration={700} className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+                  <Clock className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-950 dark:text-white">Rapid Service</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">24/7 support</p>
+                  <h4 className="text-base font-bold text-slate-950 dark:text-white">Rapid Service</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">24/7 support</p>
                 </div>
               </Reveal>
 
-              <Reveal variant="fade-up" delay={850} duration={700} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
-                  <ShieldCheck className="h-5 w-5" />
+              <Reveal variant="fade-up" delay={850} duration={700} className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                  <ShieldCheck className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-950 dark:text-white">100% Secure</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Verified products</p>
+                  <h4 className="text-base font-bold text-slate-950 dark:text-white">100% Secure</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Verified products</p>
                 </div>
               </Reveal>
             </div>
@@ -96,12 +97,12 @@ export default function HomeHero() {
             <div className="relative h-[320px] w-[320px] sm:h-[400px] sm:w-[400px] md:h-[450px] md:w-[450px] overflow-visible">
               {/* Decorative Circle Backing */}
               <Reveal variant="zoom-in" delay={150} duration={1200} className="absolute inset-0">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-100 to-teal-50 opacity-60 dark:from-emerald-950/20 dark:to-teal-950/10 scale-95" />
+                <div className="absolute inset-0 rounded-full bg-linear-to-tr from-emerald-100 to-teal-50 opacity-60 dark:from-emerald-950/20 dark:to-teal-950/10 scale-95" />
               </Reveal>
               
               {/* Main Image */}
               <Reveal variant="zoom-in" delay={300} duration={1000} className="relative w-full h-full">
-                <div className="relative w-full h-full flex items-center justify-center animate-float">
+                <div className="relative w-full h-full flex items-center justify-center">
                   <Image
                     src="/hero-illustration.png"
                     alt="MediStore Healthcare Essentials"
@@ -114,7 +115,7 @@ export default function HomeHero() {
               </Reveal>
 
               {/* Floating Stat Badge 1 */}
-              <Reveal variant="fade-right" delay={650} duration={800} className="absolute -left-4 top-1/4">
+              <Reveal variant="fade-right" delay={650} duration={800} className="absolute -left-24 top-1/4">
                 <div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/90 p-3.5 shadow-xl backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/90 animate-bounce-slow">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white">
                     <Truck className="h-5 w-5" />
@@ -127,7 +128,7 @@ export default function HomeHero() {
               </Reveal>
 
               {/* Floating Stat Badge 2 */}
-              <Reveal variant="fade-left" delay={800} duration={800} className="absolute -right-2 bottom-1/4">
+              <Reveal variant="fade-left" delay={800} duration={800} className="absolute -right-24 bottom-1/8">
                 <div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/90 p-3.5 shadow-xl backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/90 animate-bounce-delayed">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500 text-white">
                     <ShieldCheck className="h-5 w-5" />
@@ -141,7 +142,7 @@ export default function HomeHero() {
             </div>
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
