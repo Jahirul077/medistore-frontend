@@ -6,7 +6,6 @@ import Button from "@/components/common/Button";
 import {
   Grid,
   List,
-  ChevronRight,
   ArrowUpDown,
   Sliders,
 } from "lucide-react";
@@ -120,11 +119,7 @@ export default function MedicinesPage() {
       <Container>
         {/* Page Header */}
         <div className="mb-10 text-left border-b border-slate-200/50 dark:border-slate-800 pb-6">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-400 mb-2.5">
-            <span>Home</span>
-            <ChevronRight className="h-3.5 w-3.5" />
-            <span className="text-teal-500">Medicines Catalog</span>
-          </div>
+
           <h1 className="text-3xl font-black text-slate-900 dark:text-white md:text-4xl tracking-tight">
             Medicines & Essentials
           </h1>

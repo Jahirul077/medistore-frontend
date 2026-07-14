@@ -132,7 +132,7 @@ export default function MedicineOffers({ medicine }) {
       </div>
 
       {/* Why buy from us Trust Banner */}
-      <div className="bg-gradient-to-br from-teal-500/5 to-teal-500/0 dark:from-teal-955/10 rounded-3xl border border-teal-500/10 dark:border-teal-900/10 p-6 space-y-4">
+      <div className="bg-linear-to-br from-teal-500/5 to-teal-500/0 dark:from-teal-955/10 rounded-3xl border border-teal-500/10 dark:border-teal-900/10 p-6 space-y-4">
         <h3 className="text-sm font-extrabold text-teal-800 dark:text-teal-400 uppercase tracking-wider">
           MediStore Marketplace Guarantee
         </h3>

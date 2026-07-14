@@ -341,12 +341,11 @@ export default function CartContainer() {
           </div>
 
           {/* Checkout CTA */}
-          <Link href="/cart" className="block w-full pt-2">
+          <Link href="/checkout" className="block w-full pt-2">
             <Button
               variant="primary"
               icon={<ArrowRight className="h-4 w-4" />}
               className="w-full h-11 rounded-xl text-sm font-bold shadow-md shadow-teal-500/10 cursor-pointer"
-              onClick={() => toast.success("Redirecting to payment gateway...")}
             >
               Proceed to Checkout
             </Button>

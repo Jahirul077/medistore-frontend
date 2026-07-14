@@ -10,7 +10,7 @@ import Container from "@/components/common/Container";
 // Nav Link configuration
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/medicines", label: "Medicines" },
+  { href: "/shop", label: "Shop" },
 ];
 
 export default function Navbar() {

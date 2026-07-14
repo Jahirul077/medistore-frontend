@@ -39,7 +39,7 @@ export default function MedicineGridCard({ med }) {
           <span className="text-lg font-black text-slate-900 dark:text-white">
             ${med.price.toFixed(2)}
           </span>
-          <Link href={`/medicines/${med.id}`}>
+          <Link href={`/shop/${med.id}`}>
             <Button
               variant="outline"
               size="sm"

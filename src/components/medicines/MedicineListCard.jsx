@@ -54,7 +54,7 @@ export default function MedicineListCard({ med }) {
             ${med.price.toFixed(2)}
           </span>
         </div>
-        <Link href={`/medicines/${med.id}`}>
+        <Link href={`/shop/${med.id}`}>
           <Button
             variant="outline"
             size="sm"

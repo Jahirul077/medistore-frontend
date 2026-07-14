@@ -7,7 +7,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { CATEGORIES, MANUFACTURERS } from "@/app/(main)/medicines/mockData";
+import { CATEGORIES, MANUFACTURERS } from "@/app/(main)/shop/mockData";
 
 export default function MobileFilterDrawer({
   isOpen,
