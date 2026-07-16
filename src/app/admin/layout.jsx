@@ -60,7 +60,7 @@ export default function AdminLayout({ children }) {
         </div>
 
         {/* Scrollable Workspace Content */}
-        <div className="w-full h-[calc(100%-80px)] overflow-auto [scrollbar-gutter:stable] custom-scrollbar p-6 md:p-8 relative">
+        <div className="w-full h-[calc(100%-80px)] overflow-auto scrollbar-gutter-stable custom-scrollbar p-6 md:p-8 relative">
           <div className="relative z-10 space-y-6">
             {children}
           </div>
