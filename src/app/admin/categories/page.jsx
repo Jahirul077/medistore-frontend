@@ -76,9 +76,10 @@ export default function AdminCategoriesPage() {
   });
 
   // Reset page when search changes
-  useEffect(() => {
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
     setCurrentPage(1);
-  }, [searchQuery]);
+  };
 
   // Open modal for adding
   const handleAddClick = () => {
@@ -187,7 +188,7 @@ export default function AdminCategoriesPage() {
             type="text"
             placeholder="Search categories by name or descriptive keywords..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 text-sm font-normal focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800 dark:text-slate-200 transition-all"
           />
         </div>

@@ -89,9 +89,15 @@ export default function AdminUsersPage() {
   const itemsPerPage = 5;
 
   // Reset page when search or filters change
-  useEffect(() => {
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
     setCurrentPage(1);
-  }, [searchQuery, roleFilter]);
+  };
+
+  const handleRoleChange = (val) => {
+    setRoleFilter(val);
+    setCurrentPage(1);
+  };
 
   // Action: Toggle account suspension
   const handleToggleStatus = (userId) => {
@@ -165,14 +171,14 @@ export default function AdminUsersPage() {
             type="text"
             placeholder="Search users by name, email or pharmacy store..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 text-sm font-normal focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800 dark:text-slate-200 transition-all"
           />
         </div>
 
         <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0">
           <Filter size={16} className="text-slate-400 dark:text-slate-500" />
-          <Select value={roleFilter} onValueChange={(val) => setRoleFilter(val)}>
+          <Select value={roleFilter} onValueChange={handleRoleChange}>
             <SelectTrigger className="h-12 w-full md:w-48 px-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-indigo-500 cursor-pointer">
               <SelectValue placeholder="All Roles" />
             </SelectTrigger>

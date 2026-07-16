@@ -120,9 +120,15 @@ export default function AdminOrdersPage() {
   const [activeOrder, setActiveOrder] = useState(null);
 
   // Reset page when search or filters change
-  useEffect(() => {
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
     setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
+  };
+
+  const handleStatusChange = (val) => {
+    setStatusFilter(val);
+    setCurrentPage(1);
+  };
 
   const handleUpdateStatus = (orderId, newStatus) => {
     setOrders((prevOrders) =>
@@ -197,14 +203,14 @@ export default function AdminOrdersPage() {
             type="text"
             placeholder="Search Order ID, customer, seller store or phone number..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 text-sm font-normal focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-800 dark:text-slate-200 transition-all"
           />
         </div>
 
         <div className="flex items-center gap-2.5 w-full md:w-auto shrink-0">
           <Filter size={16} className="text-slate-400 dark:text-slate-500" />
-          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val)}>
+          <Select value={statusFilter} onValueChange={handleStatusChange}>
             <SelectTrigger className="h-12 w-full md:w-52 px-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950 text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-indigo-500 cursor-pointer">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
