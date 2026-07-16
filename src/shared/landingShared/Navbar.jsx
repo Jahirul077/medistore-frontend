@@ -87,7 +87,7 @@ export default function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/dashboard/overview">
+            <Link href="/admin">
               <Button variant="outline" size="md" className="text-base h-10 px-5 cursor-pointer">
                 Dashboard
               </Button>
@@ -141,7 +141,7 @@ export default function Navbar() {
 
             {/* Mobile Actions */}
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 dark:border-slate-900">
-              <Link href="/dashboard/overview" onClick={() => setIsOpen(false)} className="w-full">
+              <Link href="/admin" onClick={() => setIsOpen(false)} className="w-full">
                 <Button variant="outline" size="md" className="w-full text-base h-10 cursor-pointer">
                   Dashboard
                 </Button>

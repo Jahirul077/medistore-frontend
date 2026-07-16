@@ -33,16 +33,16 @@ function SuccessPageContent() {
             </p>
 
             {orderId && (
-              <div className="mb-6 py-2 px-4 bg-slate-50 dark:bg-slate-955 rounded-xl border border-slate-100 dark:border-slate-850 inline-block">
-                <span className="text-xs text-slate-450 font-semibold mr-1.5">Order ID:</span>
-                <span className="text-xs font-mono font-black text-slate-800 dark:text-slate-205">{orderId}</span>
+              <div className="mb-6 py-2 px-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 inline-block">
+                <span className="text-xs text-slate-400 font-semibold mr-1.5">Order ID:</span>
+                <span className="text-xs font-mono font-black text-slate-800 dark:text-slate-200">{orderId}</span>
               </div>
             )}
 
             {/* Simple action buttons */}
             <div className="flex flex-col gap-3">
               <Button
-                onClick={() => router.push("/dashboard/orders")}
+                onClick={() => router.push("/admin/orders")}
                 variant="primary"
                 iconRight={<ArrowRight className="h-4 w-4" />}
                 className="w-full rounded-2xl font-bold cursor-pointer"
