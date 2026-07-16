@@ -12,6 +12,13 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Mock Data for Dashboard Charts
 const salesData = [
@@ -44,10 +51,15 @@ export default function SalesChart() {
             </h3>
             <p className="text-sm text-slate-400 mt-0.5">Monthly gross sales earnings</p>
           </div>
-          <select className="px-3.5 py-2 text-sm rounded-lg border border-slate-100 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium focus:outline-none focus:ring-1 focus:ring-teal-500">
-            <option>Last 6 Months</option>
-            <option>Last Year</option>
-          </select>
+          <Select defaultValue="6months">
+            <SelectTrigger className="h-10 w-40 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium focus:ring-teal-500 cursor-pointer">
+              <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-200">
+              <SelectItem value="6months">Last 6 Months</SelectItem>
+              <SelectItem value="year">Last Year</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="h-[280px] w-full">
           <ResponsiveContainer width="100%" height="100%">

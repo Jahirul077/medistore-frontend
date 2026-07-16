@@ -27,9 +27,9 @@ const SellerSidebar = () => {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 transition-colors duration-300">
+    <div className="h-full flex flex-col bg-white dark:bg-slate-900 border-r dark:border-slate-800 transition-colors duration-300">
       {/* Brand Logo Header */}
-      <div className="p-6 flex items-center justify-between border-b border-slate-50 dark:border-slate-800/50">
+      <div className="p-6 flex items-center justify-between border-b dark:border-slate-800/50">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500 text-white shadow-md shadow-teal-500/20 group-hover:scale-105 transition-transform duration-200">
             <Activity className="h-5 w-5" />
@@ -55,7 +55,7 @@ const SellerSidebar = () => {
                 ${
                   isActive
                     ? "bg-linear-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 border-teal-500/20 text-teal-600 dark:text-teal-400 shadow-sm"
-                    : "text-slate-550 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 border-transparent hover:border-slate-100 dark:hover:border-slate-800"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 border-transparent hover:border dark:hover:border-slate-800"
                 }`}
             >
               <span className={`transition-colors duration-200 ${isActive ? "text-teal-500" : "text-slate-400 dark:text-slate-500"}`}>
@@ -68,12 +68,12 @@ const SellerSidebar = () => {
       </nav>
 
       {/* Sidebar Footer / Action */}
-      <div className="p-4 border-t border-slate-50 dark:border-slate-800/50">
+      <div className="p-4 border-t dark:border-slate-800/50">
         <Link
           href="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-55 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-100 dark:hover:border-slate-800 transition-all duration-200 font-medium text-sm w-full"
+          className="flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border dark:hover:border-slate-800 transition-all duration-200 font-medium text-sm w-full"
         >
-          <ArrowLeft size={18} className="text-slate-400 dark:text-slate-550" />
+          <ArrowLeft size={18} className="text-slate-400 dark:text-slate-500" />
           <span>Back to Shop</span>
         </Link>
       </div>

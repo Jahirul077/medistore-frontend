@@ -68,7 +68,7 @@ export default function RecentOrdersTable({ orders, onAcceptOrder }) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-805/50">
+          <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
             {orders.map((order) => (
               <tr
                 key={order.id}
@@ -80,7 +80,7 @@ export default function RecentOrdersTable({ orders, onAcceptOrder }) {
                 <td className="py-4 px-4 text-base font-medium text-slate-700 dark:text-slate-300">
                   {order.customer}
                 </td>
-                <td className="py-4 px-4 text-sm font-normal text-slate-450 dark:text-slate-500">
+                <td className="py-4 px-4 text-sm font-normal text-slate-500 dark:text-slate-400">
                   {order.date}
                 </td>
                 <td className="py-4 px-4 text-sm font-normal text-slate-600 dark:text-slate-400 max-w-[200px] truncate">
@@ -112,7 +112,7 @@ export default function RecentOrdersTable({ orders, onAcceptOrder }) {
                       Accept
                     </button>
                   ) : (
-                    <span className="text-sm font-normal text-slate-400 dark:text-slate-655">
+                    <span className="text-sm font-normal text-slate-400 dark:text-slate-500">
                       Processed
                     </span>
                   )}

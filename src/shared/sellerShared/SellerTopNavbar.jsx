@@ -1,10 +1,18 @@
 "use client";
 
 import React from "react";
-import { Search, User, Menu } from "lucide-react";
+import { Search, User, Menu, LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
-const SellerTopNavbar = ({ onMenuClick }) => {
+const SellerTopNavbar = ({ onMenuClick, onLogout }) => {
   const pathname = usePathname();
 
   // Determine page title based on path
@@ -12,6 +20,7 @@ const SellerTopNavbar = ({ onMenuClick }) => {
     if (pathname.includes("/seller/dashboard")) return "Seller Dashboard";
     if (pathname.includes("/seller/medicines")) return "Medicine Inventory";
     if (pathname.includes("/seller/orders")) return "Order Management";
+    if (pathname.includes("/seller/profile")) return "Seller Profile";
     return "Seller Panel";
   };
 
@@ -21,7 +30,7 @@ const SellerTopNavbar = ({ onMenuClick }) => {
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="xl:hidden p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-655 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+          className="xl:hidden p-2 rounded-xl border dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
           aria-label="Toggle Sidebar"
         >
           <Menu size={20} />
@@ -48,20 +57,38 @@ const SellerTopNavbar = ({ onMenuClick }) => {
           />
         </div>
 
-        {/* Profile Info */}
-        <div className="flex items-center gap-3 pl-1.5 border-l border-slate-100 dark:border-slate-800">
-          <div className="h-10 w-10 rounded-xl bg-teal-500/10 p-2 flex items-center justify-center border border-teal-500/20 text-teal-600 dark:text-teal-400 shadow-sm">
-            <User size={18} />
-          </div>
-          <div className="hidden sm:flex flex-col text-left">
-            <span className="text-base font-medium text-slate-800 dark:text-slate-200 leading-tight">
-              Jahirul Islam
-            </span>
-            <span className="text-xs text-slate-400 dark:text-slate-500">
-              Seller Account
-            </span>
-          </div>
-        </div>
+        {/* Profile Info Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-3 pl-1.5 border-l dark:border-slate-800 cursor-pointer focus:outline-none select-none">
+            <div className="h-10 w-10 rounded-xl bg-teal-500/10 p-2 flex items-center justify-center border border-teal-500/20 text-teal-600 dark:text-teal-400 shadow-sm hover:bg-teal-500/20 transition-colors">
+              <User size={18} />
+            </div>
+            <div className="hidden sm:flex flex-col text-left">
+              <span className="text-base font-medium text-slate-800 dark:text-slate-200 leading-tight">
+                Jahirul Islam
+              </span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">
+                Seller Account
+              </span>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52 bg-white dark:bg-slate-900 border dark:border-slate-800 rounded-2xl shadow-lg p-1.5 mt-1 text-slate-700 dark:text-slate-200">
+            <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 text-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2">
+              <Link href="/seller/profile" className="flex items-center gap-2 w-full">
+                <User size={15} className="text-slate-500" />
+                <span>My Profile</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800 my-1" />
+            <DropdownMenuItem
+              onClick={onLogout}
+              className="rounded-xl px-3 py-2.5 text-sm cursor-pointer text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 flex items-center gap-2"
+            >
+              <LogOut size={15} />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
