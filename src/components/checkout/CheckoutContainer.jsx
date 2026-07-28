@@ -7,7 +7,14 @@ import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { ShoppingBag, ArrowLeft, CreditCard, Truck, ShieldCheck, CheckCircle2 } from "lucide-react";
+import {
+  ShoppingBag,
+  ArrowLeft,
+  CreditCard,
+  Truck,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
 import Button from "@/components/common/Button";
 import { clearCart } from "@/redux/slices/cartSlice";
 import useCreateOrderMutation from "@/hooks/Orders/useCreateOrderMutation";
@@ -17,7 +24,9 @@ import useGetMeQuery from "@/hooks/Auth/useGetMeQuery";
 export default function CheckoutContainer() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const rawCartItems = useSelector((state) => state.cart?.items || state.cart?.cartItems);
+  const rawCartItems = useSelector(
+    (state) => state.cart?.items || state.cart?.cartItems,
+  );
   const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
   const [paymentMethod, setPaymentMethod] = useState("card");
 
@@ -58,12 +67,17 @@ export default function CheckoutContainer() {
   }, [currentUser, reset]);
 
   // Create Order Mutation
-  const { mutateAsync: createOrder, isPending: isOrdering } = useCreateOrderMutation();
+  const { mutateAsync: createOrder, isPending: isOrdering } =
+    useCreateOrderMutation();
 
   // Create Payment Mutation
-  const { mutateAsync: createPayment, isPending: isPaying } = useCreatePaymentMutation();
+  const { mutateAsync: createPayment, isPending: isPaying } =
+    useCreatePaymentMutation();
 
-  const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + (item.price || 0) * (item.quantity || 1),
+    0,
+  );
   const isPending = isOrdering || isPaying;
 
   const onSubmit = async (data) => {
@@ -74,10 +88,10 @@ export default function CheckoutContainer() {
 
     try {
       const fullShippingAddress = `${data.address}, ${data.city}${data.zip ? ` - ${data.zip}` : ""}`;
-      
+
       const payloadItems = cartItems.map((item) => ({
-        sellerInventoryId: item.sellerInventoryId || item.id,
         SellerInventoryId: item.sellerInventoryId || item.id,
+        sellerInventoryId: item.sellerInventoryId || item.id,
         quantity: item.quantity,
       }));
 
@@ -99,8 +113,17 @@ export default function CheckoutContainer() {
       // Step 2: Handle Stripe Checkout redirect if payment method is "card"
       if (paymentMethod === "card") {
         toast.loading("Redirecting to Stripe payment gateway...");
-        const paymentRes = await createPayment({ orderId });
-        const checkoutUrl = paymentRes?.data?.url || paymentRes?.url;
+        const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+        const paymentRes = await createPayment({
+          orderId,
+          successUrl: `${origin}/payment/success`,
+          cancelUrl: `${origin}/payment/cancel`,
+        });
+        const checkoutUrl =
+          paymentRes?.data?.paymentUrl ||
+          paymentRes?.data?.url ||
+          paymentRes?.paymentUrl ||
+          paymentRes?.url;
 
         if (checkoutUrl) {
           dispatch(clearCart());
@@ -124,13 +147,20 @@ export default function CheckoutContainer() {
           <ShoppingBag size={36} />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Your Cart is Empty</h2>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
+            Your Cart is Empty
+          </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm">
             Add items to your cart before proceeding to checkout.
           </p>
         </div>
         <Link href="/shop" className="inline-block pt-2">
-          <Button variant="primary" size="md" icon={<ArrowLeft size={16} />} className="cursor-pointer font-medium">
+          <Button
+            variant="primary"
+            size="md"
+            icon={<ArrowLeft size={16} />}
+            className="cursor-pointer font-medium"
+          >
             Return to Shop
           </Button>
         </Link>
@@ -139,7 +169,10 @@ export default function CheckoutContainer() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="grid grid-cols-1 lg:grid-cols-12 gap-8"
+    >
       {/* Left Column: Delivery Info & Payment Selection */}
       <div className="lg:col-span-7 space-y-6">
         {/* Shipping Form Card */}
@@ -149,8 +182,12 @@ export default function CheckoutContainer() {
               <Truck size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Shipping Address</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Where should we deliver your medicine order?</p>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                Shipping Address
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Where should we deliver your medicine order?
+              </p>
             </div>
           </div>
 
@@ -166,10 +203,16 @@ export default function CheckoutContainer() {
                 disabled={isPending}
                 {...register("fullName", { required: "Full name is required" })}
                 className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none transition-all ${
-                  errors.fullName ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                  errors.fullName
+                    ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20"
+                    : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
                 }`}
               />
-              {errors.fullName && <span className="text-xs text-rose-500 font-semibold">{errors.fullName.message}</span>}
+              {errors.fullName && (
+                <span className="text-xs text-rose-500 font-semibold">
+                  {errors.fullName.message}
+                </span>
+              )}
             </div>
 
             {/* Phone */}
@@ -183,10 +226,16 @@ export default function CheckoutContainer() {
                 disabled={isPending}
                 {...register("phone", { required: "Phone number is required" })}
                 className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none transition-all ${
-                  errors.phone ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                  errors.phone
+                    ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20"
+                    : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
                 }`}
               />
-              {errors.phone && <span className="text-xs text-rose-500 font-semibold">{errors.phone.message}</span>}
+              {errors.phone && (
+                <span className="text-xs text-rose-500 font-semibold">
+                  {errors.phone.message}
+                </span>
+              )}
             </div>
 
             {/* Email */}
@@ -214,10 +263,16 @@ export default function CheckoutContainer() {
                 disabled={isPending}
                 {...register("address", { required: "Address is required" })}
                 className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none transition-all ${
-                  errors.address ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                  errors.address
+                    ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20"
+                    : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
                 }`}
               />
-              {errors.address && <span className="text-xs text-rose-500 font-semibold">{errors.address.message}</span>}
+              {errors.address && (
+                <span className="text-xs text-rose-500 font-semibold">
+                  {errors.address.message}
+                </span>
+              )}
             </div>
 
             {/* City */}
@@ -257,8 +312,12 @@ export default function CheckoutContainer() {
               <CreditCard size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Payment Method</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Select how you would like to pay for this order.</p>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                Payment Method
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Select how you would like to pay for this order.
+              </p>
             </div>
           </div>
 
@@ -271,10 +330,18 @@ export default function CheckoutContainer() {
                   : "border-slate-100 dark:border-slate-800 hover:border-slate-200"
               }`}
             >
-              <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "card" ? "border-teal-500 bg-teal-500" : "border-slate-300"}`}>
-                {paymentMethod === "card" && <div className="h-2 w-2 bg-white rounded-full" />}
+              <div
+                className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "card" ? "border-teal-500 bg-teal-500" : "border-slate-300"}`}
+              >
+                {paymentMethod === "card" && (
+                  <div className="h-2 w-2 bg-white rounded-full" />
+                )}
               </div>
-              <span className={`text-sm font-semibold ${paymentMethod === "card" ? "text-slate-900 dark:text-white" : "text-slate-600"}`}>Online Payment (Stripe)</span>
+              <span
+                className={`text-sm font-semibold ${paymentMethod === "card" ? "text-slate-900 dark:text-white" : "text-slate-600"}`}
+              >
+                Online Payment (Stripe)
+              </span>
             </div>
 
             <div
@@ -285,10 +352,18 @@ export default function CheckoutContainer() {
                   : "border-slate-100 dark:border-slate-800 hover:border-slate-200"
               }`}
             >
-              <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "cod" ? "border-teal-500 bg-teal-500" : "border-slate-300"}`}>
-                {paymentMethod === "cod" && <div className="h-2 w-2 bg-white rounded-full" />}
+              <div
+                className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "cod" ? "border-teal-500 bg-teal-500" : "border-slate-300"}`}
+              >
+                {paymentMethod === "cod" && (
+                  <div className="h-2 w-2 bg-white rounded-full" />
+                )}
               </div>
-              <span className={`text-sm font-semibold ${paymentMethod === "cod" ? "text-slate-900 dark:text-white" : "text-slate-600"}`}>Cash on Delivery</span>
+              <span
+                className={`text-sm font-semibold ${paymentMethod === "cod" ? "text-slate-900 dark:text-white" : "text-slate-600"}`}
+              >
+                Cash on Delivery
+              </span>
             </div>
           </div>
         </div>
@@ -304,17 +379,33 @@ export default function CheckoutContainer() {
           {/* Cart Item Row List */}
           <div className="space-y-4 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
             {cartItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-3.5 pb-3 border-b border-slate-50 dark:border-slate-800/50">
+              <div
+                key={item.id}
+                className="flex items-center gap-3.5 pb-3 border-b border-slate-50 dark:border-slate-800/50"
+              >
                 {item.image && (
                   <div className="h-12 w-12 bg-slate-50 dark:bg-slate-955 rounded-xl p-1 border border-slate-100 dark:border-slate-850 shrink-0 flex items-center justify-center">
-                    <Image src={item.image} alt={item.title} width={44} height={44} unoptimized className="object-contain max-h-full" />
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      width={44}
+                      height={44}
+                      unoptimized
+                      className="object-contain max-h-full"
+                    />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{item.title}</h4>
-                  <span className="text-[11px] text-slate-400">Qty: {item.quantity} × ${item.price.toFixed(2)}</span>
+                  <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                    {item.title}
+                  </h4>
+                  <span className="text-[11px] text-slate-400">
+                    Qty: {item.quantity} × ${item.price.toFixed(2)}
+                  </span>
                 </div>
-                <span className="text-xs font-bold text-slate-900 dark:text-white">${(item.price * item.quantity).toFixed(2)}</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </span>
               </div>
             ))}
           </div>
@@ -323,15 +414,23 @@ export default function CheckoutContainer() {
           <div className="space-y-2.5 pt-2 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">${subtotal.toFixed(2)}</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                ${subtotal.toFixed(2)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Shipping Fee</span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-medium">Free</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                Free
+              </span>
             </div>
             <div className="flex justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-sm">
-              <span className="font-bold text-slate-900 dark:text-white">Total Amount</span>
-              <span className="font-extrabold text-teal-600 dark:text-teal-400 text-lg">${subtotal.toFixed(2)}</span>
+              <span className="font-bold text-slate-900 dark:text-white">
+                Total Amount
+              </span>
+              <span className="font-extrabold text-teal-600 dark:text-teal-400 text-lg">
+                ${subtotal.toFixed(2)}
+              </span>
             </div>
           </div>
 
@@ -343,7 +442,11 @@ export default function CheckoutContainer() {
             icon={<CheckCircle2 size={18} />}
             className="w-full h-12 rounded-2xl text-sm font-semibold shadow-lg shadow-teal-500/20 cursor-pointer"
           >
-            {isPending ? "Processing Order..." : paymentMethod === "card" ? "Proceed to Stripe Payment" : "Place Cash Order"}
+            {isPending
+              ? "Processing Order..."
+              : paymentMethod === "card"
+                ? "Proceed to Stripe Payment"
+                : "Place Cash Order"}
           </Button>
 
           <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
