@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -13,6 +14,7 @@ import useCreateOrderMutation from "@/hooks/Orders/useCreateOrderMutation";
 import useCreatePaymentMutation from "@/hooks/Payment/useCreatePaymentMutation";
 
 export default function CheckoutContainer() {
+  const router = useRouter();
   const dispatch = useDispatch();
   const rawCartItems = useSelector((state) => state.cart?.cartItems);
   const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
@@ -71,14 +73,14 @@ export default function CheckoutContainer() {
 
         if (checkoutUrl) {
           dispatch(clearCart());
-          window.location.href = checkoutUrl;
+          window.location.assign(checkoutUrl);
           return;
         }
       }
 
       // If COD or Fallback
       dispatch(clearCart());
-      window.location.href = `/orders/${orderId}`;
+      router.push(`/orders/${orderId}`);
     } catch (err) {
       toast.error(err?.message || "Checkout failed. Please try again.");
     }
@@ -132,7 +134,7 @@ export default function CheckoutContainer() {
                 placeholder="e.g. John Doe"
                 disabled={isPending}
                 {...register("fullName", { required: "Full name is required" })}
-                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
+                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none transition-all ${
                   errors.fullName ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
                 }`}
               />
@@ -149,7 +151,7 @@ export default function CheckoutContainer() {
                 placeholder="e.g. +880 1712..."
                 disabled={isPending}
                 {...register("phone", { required: "Phone number is required" })}
-                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
+                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none transition-all ${
                   errors.phone ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
                 }`}
               />
@@ -166,7 +168,7 @@ export default function CheckoutContainer() {
                 placeholder="Optional"
                 disabled={isPending}
                 {...register("email")}
-                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
               />
             </div>
 
@@ -180,7 +182,7 @@ export default function CheckoutContainer() {
                 placeholder="House, Road, Block, Area"
                 disabled={isPending}
                 {...register("address", { required: "Address is required" })}
-                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
+                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none transition-all ${
                   errors.address ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
                 }`}
               />
@@ -197,7 +199,7 @@ export default function CheckoutContainer() {
                 placeholder="e.g. Dhaka"
                 disabled={isPending}
                 {...register("city", { required: "City is required" })}
-                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
               />
             </div>
 
@@ -211,7 +213,7 @@ export default function CheckoutContainer() {
                 placeholder="e.g. 1212"
                 disabled={isPending}
                 {...register("zip")}
-                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-955 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
               />
             </div>
           </div>

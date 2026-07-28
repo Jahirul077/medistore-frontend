@@ -98,7 +98,7 @@ export default function MedicineOverview({ medicine }) {
           })}
         </div>
 
-        <div className="p-6 md:p-8 min-h-[160px]">
+        <div className="p-6 md:p-8 min-h-40">
           {activeTab === "description" && (
             <div className="space-y-4">
               <div className="space-y-2">

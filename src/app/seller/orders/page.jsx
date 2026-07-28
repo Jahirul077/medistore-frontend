@@ -16,10 +16,23 @@ import OrdersTable from "@/components/ordersPageComponents/OrdersTable";
 import OrderDetailModal from "@/components/ordersPageComponents/OrderDetailModal";
 import Pagination from "@/components/common/Pagination";
 import useGetSellerOrdersQuery from "@/hooks/Seller/useGetSellerOrdersQuery";
+import useUpdateSellerOrderStatusMutation from "@/hooks/Seller/useUpdateSellerOrderStatusMutation";
 
 export default function SellerOrdersPage() {
-  const { data: resData, isLoading } = useGetSellerOrdersQuery();
+  const { data: resData, isLoading, refetch } = useGetSellerOrdersQuery();
   const liveOrders = resData?.data || [];
+
+  // Update Order Status Mutation
+  const { mutate: updateOrderStatus, isPending: isUpdatingStatus } =
+    useUpdateSellerOrderStatusMutation({
+      onSuccess: (res) => {
+        toast.success(res?.message || "Order status updated successfully!");
+        refetch();
+      },
+      onError: (err) => {
+        toast.error(err?.message || "Failed to update order status.");
+      },
+    });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -35,9 +48,19 @@ export default function SellerOrdersPage() {
   // Format backend order data to fit UI requirements
   const formattedOrders = liveOrders.map((ord) => {
     const rawStatus = ord.status || "PROCESSING";
-    // Title Case status: PROCESSING -> Processing, DELIVERED -> Delivered
     const formattedStatus =
       rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+
+    // Determine Payment Status accurately from backend fields & order status
+    const isPaid =
+      ord.paymentStatus === "COMPLETED" ||
+      ord.paymentStatus === "PAID" ||
+      ord.paymentStatus === "Paid" ||
+      rawStatus === "DELIVERED" ||
+      !!ord.paymentIntentId ||
+      !!ord.transactionId;
+
+    const isOnlinePayment = !!(ord.paymentIntentId || ord.transactionId);
 
     return {
       id: ord.id,
@@ -50,8 +73,8 @@ export default function SellerOrdersPage() {
         day: "numeric",
         year: "numeric",
       }),
-      paymentMethod: ord.paymentIntentId ? "Stripe (Online)" : "Cash on Delivery",
-      paymentStatus: ord.paymentStatus === "COMPLETED" ? "Paid" : "Unpaid",
+      paymentMethod: isOnlinePayment ? "Stripe (Online)" : "Cash on Delivery",
+      paymentStatus: isPaid ? "Paid" : "Unpaid",
       status: formattedStatus,
       total: Number(ord.totalAmount || 0),
       items: (ord.orderItems || []).map((item) => ({
@@ -62,9 +85,10 @@ export default function SellerOrdersPage() {
     };
   });
 
-  // Status transitions
+  // Status transitions: sends PATCH request to /api/orders/seller/:orderId
   const handleUpdateStatus = (orderId, newStatus) => {
-    toast.success(`Order ${orderId.slice(0, 8)}... updated to ${newStatus}`);
+    const uppercaseStatus = newStatus.toUpperCase();
+    updateOrderStatus({ orderId, status: uppercaseStatus });
   };
 
   // Filter Logic
@@ -101,7 +125,7 @@ export default function SellerOrdersPage() {
           Order Management
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-          Process pharmacy sales, fulfill shipments, and view incoming customer orders.
+          Process pharmacy sales, fulfill shipments, and update prescription orders.
         </p>
       </div>
 

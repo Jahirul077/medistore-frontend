@@ -222,7 +222,7 @@ export default function MedicineReviews({ medicineId }) {
       )}
 
       {!isLoading && reviews.length > 0 && (
-        <div className="space-y-6 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
+        <div className="space-y-6 max-h-200 overflow-y-auto pr-2 custom-scrollbar">
           {reviews.map((review) => {
             const dateStr = review.createdAt
               ? new Date(review.createdAt).toLocaleDateString("en-US", {

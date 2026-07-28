@@ -2,20 +2,42 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { X, LogOut } from "lucide-react";
 import Sidebar from "@/shared/adminShared/Sidebar";
 import TopNavbar from "@/shared/adminShared/TopNavbar";
+import useLogoutMutation from "@/hooks/Auth/useLogoutMutation";
+import { logout } from "@/redux/slices/authSlice";
+import { removeLocalStorage } from "@/utils/localStorage";
 
 export default function AdminLayout({ children }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const { mutate: performLogout, isPending: isLoggingOut } = useLogoutMutation({
+    onSuccess: () => {
+      removeLocalStorage("MEDISTORE_ACCESS_TOKEN");
+      removeLocalStorage("MEDISTORE_USER");
+      dispatch(logout());
+      setIsLogoutOpen(false);
+      toast.success("Logged out successfully.");
+      router.push("/auth/login");
+    },
+    onError: () => {
+      removeLocalStorage("MEDISTORE_ACCESS_TOKEN");
+      removeLocalStorage("MEDISTORE_USER");
+      dispatch(logout());
+      setIsLogoutOpen(false);
+      toast.success("Logged out successfully.");
+      router.push("/auth/login");
+    },
+  });
 
   const handleLogoutConfirm = () => {
-    setIsLogoutOpen(false);
-    toast.success("Logged out successfully.");
-    router.push("/");
+    performLogout();
   };
 
   return (
@@ -67,13 +89,13 @@ export default function AdminLayout({ children }) {
         </div>
       </div>
 
-      {/* Logout Confirmation Modal (Positioned globally at the layout viewport layer) */}
+      {/* Logout Confirmation Modal */}
       {isLogoutOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-slate-950/60 dark:bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300"
-            onClick={() => setIsLogoutOpen(false)}
+            onClick={() => !isLoggingOut && setIsLogoutOpen(false)}
           />
 
           {/* Modal Container */}
@@ -96,16 +118,18 @@ export default function AdminLayout({ children }) {
             {/* Actions */}
             <div className="flex items-center justify-center gap-3">
               <button
+                disabled={isLoggingOut}
                 onClick={() => setIsLogoutOpen(false)}
-                className="cursor-pointer border dark:border-slate-800 text-slate-500 dark:text-slate-300 font-medium px-5 py-2.5 rounded-xl flex-1 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm"
+                className="cursor-pointer border dark:border-slate-800 text-slate-500 dark:text-slate-300 font-medium px-5 py-2.5 rounded-xl flex-1 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-sm disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
+                disabled={isLoggingOut}
                 onClick={handleLogoutConfirm}
-                className="cursor-pointer bg-rose-600 hover:bg-rose-500 text-white font-medium px-5 py-2.5 rounded-xl flex-1 transition-colors text-sm shadow-md"
+                className="cursor-pointer bg-rose-600 hover:bg-rose-500 text-white font-medium px-5 py-2.5 rounded-xl flex-1 transition-colors text-sm shadow-md disabled:opacity-50"
               >
-                Yes, Log Out
+                {isLoggingOut ? "Logging out..." : "Yes, Log Out"}
               </button>
             </div>
           </div>

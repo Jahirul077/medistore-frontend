@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LayoutDashboard, Users, ShoppingBag, Grid, LogOut, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Users, ShoppingBag, Grid, User, LogOut, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,6 +13,7 @@ const Sidebar = () => {
     { icon: <Users size={18} />, label: "Users", href: "/admin/users" },
     { icon: <ShoppingBag size={18} />, label: "Orders", href: "/admin/orders" },
     { icon: <Grid size={18} />, label: "Categories", href: "/admin/categories" },
+    { icon: <User size={18} />, label: "Profile", href: "/admin/profile" },
   ];
 
   return (
