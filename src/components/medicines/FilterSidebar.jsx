@@ -26,7 +26,7 @@ export default function FilterSidebar({
     <aside className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-6 space-y-6 shadow-xs h-fit">
       {/* Title */}
       <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-4">
-        <h2 className="text-lg font-black text-slate-950 dark:text-white flex items-center gap-2">
+        <h2 className="text-lg font-black text-slate-955 dark:text-white flex items-center gap-2">
           <SlidersHorizontal className="h-4.5 w-4.5 text-teal-500" />
           Filters
         </h2>

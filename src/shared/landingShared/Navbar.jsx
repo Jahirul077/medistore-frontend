@@ -2,12 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X, ShoppingCart, Activity, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { Menu, X, ShoppingCart, Activity, User, LogOut, LayoutDashboard } from "lucide-react";
 import Button from "@/components/common/Button";
 import Container from "@/components/common/Container";
+import useLogoutMutation from "@/hooks/Auth/useLogoutMutation";
+import { logout } from "@/redux/slices/authSlice";
+import { removeLocalStorage } from "@/utils/localStorage";
+import { toast } from "sonner";
 
-// Nav Link configuration
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
@@ -15,10 +19,25 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Monitor scroll for header background styling
+  const cartItems = useSelector((state) => state.cart.items || []);
+  const cartCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
+  const { user, isAuthenticated } = useSelector((state) => state.auth || {});
+
+  const { mutate: performLogout } = useLogoutMutation({
+    onSuccess: () => {
+      removeLocalStorage("MEDISTORE_ACCESS_TOKEN");
+      removeLocalStorage("MEDISTORE_USER");
+      dispatch(logout());
+      toast.success("Logged out successfully");
+      router.push("/");
+    },
+  });
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -27,7 +46,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Utility to generate desktop link class names
   const getDesktopClass = (href) => {
     const isActive = pathname === href;
     return `text-base transition-colors ${
@@ -37,7 +55,6 @@ export default function Navbar() {
     }`;
   };
 
-  // Utility to generate mobile link class names
   const getMobileClass = (href) => {
     const isActive = pathname === href;
     return `rounded-lg px-3 py-2 text-base transition-colors ${
@@ -46,6 +63,8 @@ export default function Navbar() {
         : "font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-900"
     }`;
   };
+
+  const dashboardPath = user?.role === "ADMIN" ? "/admin" : user?.role === "SELLER" ? "/seller" : "/";
 
   return (
     <header
@@ -79,24 +98,46 @@ export default function Navbar() {
             <Link href="/cart" className={`relative flex items-center gap-1.5 ${getDesktopClass("/cart")}`}>
               <ShoppingCart className="h-5 w-5" />
               <span>Cart</span>
-              <span className="absolute -top-2.5 -right-3 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
-                3
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-2.5 -right-3 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                  {cartCount}
+                </span>
+              )}
             </Link>
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/admin">
-              <Button variant="outline" size="md" className="text-base h-10 px-5 cursor-pointer">
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/auth/login">
-              <Button variant="primary" size="md" className="text-base h-10 px-5 cursor-pointer" icon={<User className="h-4 w-4" />}>
-                Login
-              </Button>
-            </Link>
+            {isAuthenticated || user ? (
+              <div className="flex items-center gap-3">
+                {(user?.role === "ADMIN" || user?.role === "SELLER") && (
+                  <Link href={dashboardPath}>
+                    <Button variant="outline" size="md" className="text-sm h-10 px-4 cursor-pointer" icon={<LayoutDashboard className="h-4 w-4" />}>
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <User className="h-4 w-4 text-teal-600" />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    {user?.name || "User"}
+                  </span>
+                </div>
+                <button
+                  onClick={() => performLogout()}
+                  className="p-2 rounded-full text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Link href="/auth/login">
+                <Button variant="primary" size="md" className="text-base h-10 px-5 cursor-pointer" icon={<User className="h-4 w-4" />}>
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -134,23 +175,44 @@ export default function Navbar() {
                 <ShoppingCart className="h-5 w-5" />
                 Cart
               </span>
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
-                3
-              </span>
+              {cartCount > 0 && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
             {/* Mobile Actions */}
-            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 dark:border-slate-900">
-              <Link href="/admin" onClick={() => setIsOpen(false)} className="w-full">
-                <Button variant="outline" size="md" className="w-full text-base h-10 cursor-pointer">
-                  Dashboard
-                </Button>
-              </Link>
-              <Link href="/auth/login" onClick={() => setIsOpen(false)} className="w-full">
-                <Button variant="primary" size="md" className="w-full text-base h-10 cursor-pointer" icon={<User className="h-4 w-4" />}>
-                  Login
-                </Button>
-              </Link>
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-900">
+              {isAuthenticated || user ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{user?.name}</span>
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        performLogout();
+                      }}
+                      className="text-xs text-rose-600 font-bold flex items-center gap-1"
+                    >
+                      <LogOut className="h-3.5 w-3.5" /> Logout
+                    </button>
+                  </div>
+                  {(user?.role === "ADMIN" || user?.role === "SELLER") && (
+                    <Link href={dashboardPath} onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" size="md" className="w-full text-sm h-10 mt-2 cursor-pointer">
+                        Go to Dashboard
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <Link href="/auth/login" onClick={() => setIsOpen(false)} className="w-full">
+                  <Button variant="primary" size="md" className="w-full text-base h-10 cursor-pointer" icon={<User className="h-4 w-4" />}>
+                    Login
+                  </Button>
+                </Link>
+              )}
             </div>
           </nav>
         </div>

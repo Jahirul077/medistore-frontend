@@ -1,22 +1,21 @@
 import axios from "axios";
 
-const BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
-
-if (!process.env.NEXT_PUBLIC_BASE_URL) {
-  console.warn("NEXT_PUBLIC_BASE_URL is not defined in .env file");
-}
+const getBaseUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://medistore-api-seven.vercel.app";
+  if (envUrl.endsWith("/api")) {
+    return envUrl;
+  }
+  return `${envUrl.replace(/\/$/, "")}/api`;
+};
 
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
+  baseURL: getBaseUrl(),
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-  withCredentials: false,
 });
-
-export const useAxiosPublic = () => axiosInstance;
 
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -38,4 +37,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default useAxiosPublic;
+export const useAxiosPublic = () => axiosInstance;

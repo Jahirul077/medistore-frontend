@@ -50,7 +50,6 @@ export default function CartContainer() {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [isPromoApplied, setIsPromoApplied] = useState(false);
 
-  // Update item quantity
   const updateQuantity = (itemId, change) => {
     setCartItems((prevItems) =>
       prevItems.map((item) => {
@@ -65,7 +64,6 @@ export default function CartContainer() {
     );
   };
 
-  // Remove item from cart
   const removeItem = (itemId, title) => {
     setCartItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
     toast.error(`${title} removed from cart.`, {
@@ -78,7 +76,6 @@ export default function CartContainer() {
     });
   };
 
-  // Apply promo code validation
   const handleApplyPromo = (e) => {
     e.preventDefault();
     const code = promoCode.trim().toUpperCase();
@@ -118,13 +115,11 @@ export default function CartContainer() {
     }
   };
 
-  // Financial calculations
   const { subtotal, deliveryFee, tax, discountAmount, total } = useMemo(() => {
     const sub = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const disc = sub * (discountPercent / 100);
-    // Free delivery if subtotal > $30
     const delivery = sub > 30 || sub === 0 ? 0 : 5.00;
-    const estTax = (sub - disc) * 0.05; // 5% VAT/Tax
+    const estTax = (sub - disc) * 0.05;
     const grandTotal = sub - disc + delivery + estTax;
 
     return {
@@ -161,7 +156,6 @@ export default function CartContainer() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      {/* Left Column: Cart Items List (7 cols) */}
       <div className="lg:col-span-7 space-y-4">
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-5 md:p-6 shadow-xs space-y-5">
           {cartItems.map((item) => (
@@ -169,7 +163,6 @@ export default function CartContainer() {
               key={item.id}
               className="flex flex-col sm:flex-row items-center gap-4 py-4 first:pt-0 last:pb-0 border-b last:border-0 border-slate-100 dark:border-slate-850"
             >
-              {/* Medicine Image */}
               <div className="relative h-20 w-20 bg-slate-50 dark:bg-slate-950 rounded-xl p-2 flex items-center justify-center border border-slate-100 dark:border-slate-850 shrink-0">
                 <Image
                   src={item.image}
@@ -180,7 +173,6 @@ export default function CartContainer() {
                 />
               </div>
 
-              {/* Product Metadata Details */}
               <div className="flex-1 space-y-1 text-center sm:text-left">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                   {item.manufacturer}
@@ -196,9 +188,7 @@ export default function CartContainer() {
                 </span>
               </div>
 
-              {/* Quantity Actions & Price controls */}
               <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-850">
-                {/* Quantity Selector */}
                 <div className="flex items-center border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 h-9 p-1">
                   <button
                     onClick={() => updateQuantity(item.id, -1)}
@@ -219,7 +209,6 @@ export default function CartContainer() {
                   </button>
                 </div>
 
-                {/* Price and delete button */}
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <span className="text-sm font-black text-slate-900 dark:text-white block">
@@ -242,7 +231,6 @@ export default function CartContainer() {
           ))}
         </div>
 
-        {/* Back to shopping action */}
         <Link
           href="/medicines"
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-teal-650 transition-colors cursor-pointer"
@@ -252,9 +240,7 @@ export default function CartContainer() {
         </Link>
       </div>
 
-      {/* Right Column: Checkout Summary (5 cols) */}
       <div className="lg:col-span-5 space-y-6">
-        {/* Promo Code box */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-5 shadow-xs">
           <form onSubmit={handleApplyPromo} className="space-y-3">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
@@ -288,7 +274,6 @@ export default function CartContainer() {
           </form>
         </div>
 
-        {/* Order Summary box */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-6 shadow-xs space-y-5">
           <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
             Order Summary
@@ -330,7 +315,6 @@ export default function CartContainer() {
             </div>
           </div>
 
-          {/* Grand Total */}
           <div className="flex items-center justify-between">
             <span className="text-base font-extrabold text-slate-900 dark:text-white">
               Total Amount
@@ -340,7 +324,6 @@ export default function CartContainer() {
             </span>
           </div>
 
-          {/* Checkout CTA */}
           <Link href="/checkout" className="block w-full pt-2">
             <Button
               variant="primary"
@@ -352,14 +335,13 @@ export default function CartContainer() {
           </Link>
         </div>
 
-        {/* Guarantees banner */}
         <div className="bg-slate-50/50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-3xl p-5 flex items-start gap-3">
           <ShieldCheck className="h-5 w-5 text-teal-500 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <h4 className="text-xs font-bold text-slate-805 dark:text-slate-200 uppercase tracking-wider">
               Safe & Secure Checkout
             </h4>
-            <p className="text-[11px] text-slate-450 dark:text-slate-500 leading-normal">
+            <p className="text-[11px] text-slate-455 dark:text-slate-500 leading-normal">
               Your payments are processed securely. MediStore guarantees authentic medications or a full refund.
             </p>
           </div>

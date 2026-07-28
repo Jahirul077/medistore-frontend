@@ -233,7 +233,6 @@ export default function CheckoutContainer() {
               </label>
             </div>
           </div>
-
         </form>
       </div>
 
