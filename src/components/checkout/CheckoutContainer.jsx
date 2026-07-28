@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ import Button from "@/components/common/Button";
 import { clearCart } from "@/redux/slices/cartSlice";
 import useCreateOrderMutation from "@/hooks/Orders/useCreateOrderMutation";
 import useCreatePaymentMutation from "@/hooks/Payment/useCreatePaymentMutation";
+import useGetMeQuery from "@/hooks/Auth/useGetMeQuery";
 
 export default function CheckoutContainer() {
   const router = useRouter();
@@ -20,12 +21,41 @@ export default function CheckoutContainer() {
   const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
   const [paymentMethod, setPaymentMethod] = useState("card");
 
+  // Get User details from Redux & API
+  const { user: reduxUser } = useSelector((state) => state.auth || {});
+  const { data: meData } = useGetMeQuery();
+  const currentUser = meData?.data || meData || reduxUser;
+
   // React Hook Form
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      fullName: currentUser?.name || "",
+      email: currentUser?.email || "",
+      phone: currentUser?.phone || "",
+      address: "",
+      city: "",
+      zip: "",
+    },
+  });
+
+  // Pre-fill user details dynamically when loaded
+  useEffect(() => {
+    if (currentUser) {
+      reset((prevValues) => ({
+        fullName: prevValues.fullName || currentUser.name || "",
+        email: prevValues.email || currentUser.email || "",
+        phone: prevValues.phone || currentUser.phone || "",
+        address: prevValues.address || "",
+        city: prevValues.city || "",
+        zip: prevValues.zip || "",
+      }));
+    }
+  }, [currentUser, reset]);
 
   // Create Order Mutation
   const { mutateAsync: createOrder, isPending: isOrdering } = useCreateOrderMutation();
