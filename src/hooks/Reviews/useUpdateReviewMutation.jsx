@@ -1,13 +1,13 @@
 import useAxiosPrivate from "@/hooks/Axios/useAxiosPrivate";
 import { useMutation } from "@tanstack/react-query";
 
-export default function useCreateOrderMutation({ onSuccess, onError } = {}) {
+export default function useUpdateReviewMutation({ onSuccess, onError } = {}) {
   const axiosPrivate = useAxiosPrivate();
 
   return useMutation({
-    mutationKey: ["createOrderMutation"],
-    mutationFn: async (payload) => {
-      const res = await axiosPrivate.post("/orders", payload);
+    mutationKey: ["updateReviewMutation"],
+    mutationFn: async ({ id, data }) => {
+      const res = await axiosPrivate.patch(`/review/${id}`, data);
       return res?.data;
     },
     onSuccess,

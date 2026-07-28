@@ -1,13 +1,13 @@
 import { useAxiosPublic } from "@/hooks/Axios/useAxiosPublic";
 import { useQuery } from "@tanstack/react-query";
 
-export default function useGetAllCategoriesQuery() {
+export default function useGetFeaturedMedicinesQuery() {
   const axiosPublic = useAxiosPublic();
 
   return useQuery({
-    queryKey: ["allCategories"],
+    queryKey: ["featuredMedicines"],
     queryFn: async () => {
-      const res = await axiosPublic.get("/categories");
+      const res = await axiosPublic.get("/medicines/featured");
       return res?.data;
     },
   });

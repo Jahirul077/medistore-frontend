@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="w-full max-w-[440px] px-4 py-8">
+    <div className="w-full max-w-110 px-4 py-8">
       <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl shadow-slate-200/40 dark:shadow-none space-y-7">
         
         {/* Header / Logo */}
@@ -283,6 +283,7 @@ export default function ForgotPasswordPage() {
                   {...step3Form.register("confirmPassword", {
                     required: "Please confirm your password",
                     validate: (val) =>
+                      // eslint-disable-next-line react-hooks/incompatible-library
                       val === step3Form.watch("newPassword") || "Passwords do not match",
                   })}
                   className={`w-full pl-10 pr-10 py-2.5 rounded-2xl border text-sm bg-white text-slate-850 focus:outline-none dark:bg-slate-950 dark:text-slate-200 transition-all ${

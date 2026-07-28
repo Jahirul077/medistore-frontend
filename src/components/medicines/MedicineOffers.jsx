@@ -3,16 +3,18 @@
 import React, { useState } from "react";
 import { Store, Minus, Plus, ShoppingCart, CheckCircle2 } from "lucide-react";
 import Button from "@/components/common/Button";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { addToCart } from "@/redux/slices/cartSlice";
 
 export default function MedicineOffers({ medicine }) {
+  const dispatch = useDispatch();
+  const inventories = medicine?.inventories || [];
+
   // Track quantities for each vendor offer
-  const [quantities, setQuantities] = useState(
-    medicine.inventories.reduce((acc, inv) => {
-      acc[inv.id] = 1;
-      return acc;
-    }, {})
-  );
+  const [quantities, setQuantities] = useState({});
+
+  const getQty = (invId) => quantities[invId] || 1;
 
   const handleQuantityChange = (invId, change, maxStock) => {
     setQuantities((prev) => {
@@ -24,20 +26,23 @@ export default function MedicineOffers({ medicine }) {
   };
 
   const handleAddToCart = (inventory) => {
-    const qty = quantities[inventory.id] || 1;
-    toast.success(
-      `Added ${qty}x ${medicine.title} from ${inventory.seller.name} to cart!`,
-      {
-        icon: "🛒",
-        style: {
-          borderRadius: "16px",
-          background: "#0d9488",
-          color: "#fff",
-          fontSize: "14px",
-          fontWeight: "bold",
-        },
-      }
+    const qty = getQty(inventory.id);
+    const priceVal = Number(inventory.price || 0);
+
+    dispatch(
+      addToCart({
+        id: medicine.id,
+        sellerInventoryId: inventory.id,
+        title: medicine.title,
+        genericName: medicine.genericName,
+        strength: medicine.strength,
+        image: medicine.image,
+        price: priceVal,
+        quantity: qty,
+      })
     );
+
+    toast.success(`Added ${qty}x ${medicine.title} to cart!`);
   };
 
   return (
@@ -53,11 +58,17 @@ export default function MedicineOffers({ medicine }) {
           </p>
         </div>
 
+        {inventories.length === 0 && (
+          <div className="text-center py-6 text-slate-400 font-medium text-sm border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+            No active vendor offers currently listed for this medicine.
+          </div>
+        )}
+
         {/* Sellers List */}
         <div className="space-y-4">
-          {medicine.inventories.map((inventory) => {
-            const qty = quantities[inventory.id] || 1;
-            const priceVal = Number(inventory.price);
+          {inventories.map((inventory) => {
+            const qty = getQty(inventory.id);
+            const priceVal = Number(inventory.price || 0);
             const totalPrice = (priceVal * qty).toFixed(2);
 
             return (
@@ -73,7 +84,7 @@ export default function MedicineOffers({ medicine }) {
                     </div>
                     <div>
                       <h4 className="text-sm font-extrabold text-slate-800 dark:text-slate-200">
-                        {inventory.seller.name}
+                        {inventory.seller?.name || "Verified Pharmacy"}
                       </h4>
                       <span className="text-[11px] text-emerald-505 font-bold bg-emerald-500/5 px-2 py-0.5 rounded">
                         {inventory.stock} In Stock
@@ -131,7 +142,7 @@ export default function MedicineOffers({ medicine }) {
         </div>
       </div>
 
-      {/* Why buy from us Trust Banner */}
+      {/* Trust Banner */}
       <div className="bg-linear-to-br from-teal-500/5 to-teal-500/0 dark:from-teal-955/10 rounded-3xl border border-teal-500/10 dark:border-teal-900/10 p-6 space-y-4">
         <h3 className="text-sm font-extrabold text-teal-800 dark:text-teal-400 uppercase tracking-wider">
           MediStore Marketplace Guarantee

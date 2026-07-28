@@ -1,13 +1,13 @@
 import useAxiosPrivate from "@/hooks/Axios/useAxiosPrivate";
 import { useMutation } from "@tanstack/react-query";
 
-export default function useCreateOrderMutation({ onSuccess, onError } = {}) {
+export default function useDeleteReviewMutation({ onSuccess, onError } = {}) {
   const axiosPrivate = useAxiosPrivate();
 
   return useMutation({
-    mutationKey: ["createOrderMutation"],
-    mutationFn: async (payload) => {
-      const res = await axiosPrivate.post("/orders", payload);
+    mutationKey: ["deleteReviewMutation"],
+    mutationFn: async (id) => {
+      const res = await axiosPrivate.delete(`/review/${id}`);
       return res?.data;
     },
     onSuccess,

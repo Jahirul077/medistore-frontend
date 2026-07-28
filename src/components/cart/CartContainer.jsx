@@ -12,68 +12,30 @@ import {
   Tag,
   Percent,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import toast from "react-hot-toast";
-
-// Initial mock cart items
-const INITIAL_CART_ITEMS = [
-  {
-    id: "fc93b9d7-5153-4589-a3c8-e0279654b00a",
-    title: "Seclo 20",
-    genericName: "Omeprazole",
-    strength: "20mg",
-    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=300&auto=format&fit=crop",
-    manufacturer: "Square Pharmaceuticals",
-    price: 7.00,
-    sellerName: "Vendor Pharmacy",
-    quantity: 2,
-    stock: 796,
-  },
-  {
-    id: "ac93b9d7-5153-4589-a3c8-e0279654b00b",
-    title: "Napa Extend",
-    genericName: "Paracetamol",
-    strength: "665mg",
-    image: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?q=80&w=300&auto=format&fit=crop",
-    manufacturer: "Beximco Pharmaceuticals",
-    price: 2.20,
-    sellerName: "Model Pharmacy Ltd.",
-    quantity: 5,
-    stock: 1200,
-  },
-];
+import Image from "next/image";
+import { useSelector, useDispatch } from "react-redux";
+import { removeFromCart, updateQuantity } from "@/redux/slices/cartSlice";
+import { toast } from "sonner";
 
 export default function CartContainer() {
-  const [cartItems, setCartItems] = useState(INITIAL_CART_ITEMS);
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart.items || []);
+
   const [promoCode, setPromoCode] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
   const [isPromoApplied, setIsPromoApplied] = useState(false);
 
-  const updateQuantity = (itemId, change) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === itemId) {
-          const nextQty = item.quantity + change;
-          if (nextQty >= 1 && nextQty <= item.stock) {
-            return { ...item, quantity: nextQty };
-          }
-        }
-        return item;
-      })
-    );
+  const handleUpdateQuantity = (itemId, currentQty, change) => {
+    const nextQty = currentQty + change;
+    if (nextQty >= 1) {
+      dispatch(updateQuantity({ id: itemId, quantity: nextQty }));
+    }
   };
 
-  const removeItem = (itemId, title) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
-    toast.error(`${title} removed from cart.`, {
-      style: {
-        borderRadius: "12px",
-        background: "#ef4444",
-        color: "#fff",
-        fontSize: "14px",
-      },
-    });
+  const handleRemoveItem = (itemId, title) => {
+    dispatch(removeFromCart(itemId));
+    toast.success(`${title || "Item"} removed from cart.`);
   };
 
   const handleApplyPromo = (e) => {
@@ -82,43 +44,23 @@ export default function CartContainer() {
     if (code === "MEDISTORE10") {
       setDiscountPercent(10);
       setIsPromoApplied(true);
-      toast.success("Promo code applied! 10% discount added.", {
-        icon: "🏷️",
-        style: {
-          borderRadius: "12px",
-          background: "#0d9488",
-          color: "#fff",
-          fontSize: "14px",
-        },
-      });
+      toast.success("Promo code applied! 10% discount added.");
     } else if (code === "HEALTH20") {
       setDiscountPercent(20);
       setIsPromoApplied(true);
-      toast.success("Promo code applied! 20% discount added.", {
-        icon: "🏷️",
-        style: {
-          borderRadius: "12px",
-          background: "#0d9488",
-          color: "#fff",
-          fontSize: "14px",
-        },
-      });
+      toast.success("Promo code applied! 20% discount added.");
     } else {
-      toast.error("Invalid coupon code.", {
-        style: {
-          borderRadius: "12px",
-          background: "#ef4444",
-          color: "#fff",
-          fontSize: "14px",
-        },
-      });
+      toast.error("Invalid coupon code.");
     }
   };
 
   const { subtotal, deliveryFee, tax, discountAmount, total } = useMemo(() => {
-    const sub = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const sub = cartItems.reduce(
+      (acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 1),
+      0
+    );
     const disc = sub * (discountPercent / 100);
-    const delivery = sub > 30 || sub === 0 ? 0 : 5.00;
+    const delivery = sub > 30 || sub === 0 ? 0 : 5.0;
     const estTax = (sub - disc) * 0.05;
     const grandTotal = sub - disc + delivery + estTax;
 
@@ -142,12 +84,12 @@ export default function CartContainer() {
             Your Cart is Empty
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Looks like you haven't added any medicines yet. Start exploring our pharmacy catalog!
+            Looks like you haven&apos;t added any medicines yet. Start exploring our pharmacy catalog!
           </p>
         </div>
-        <Link href="/medicines" className="inline-block w-full">
+        <Link href="/shop" className="inline-block w-full">
           <Button variant="primary" className="w-full h-11 rounded-xl text-sm font-bold cursor-pointer">
-            Explore Medicines
+            Explore Shop Catalog
           </Button>
         </Link>
       </div>
@@ -156,83 +98,84 @@ export default function CartContainer() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Cart Items List */}
       <div className="lg:col-span-7 space-y-4">
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-5 md:p-6 shadow-xs space-y-5">
-          {cartItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-col sm:flex-row items-center gap-4 py-4 first:pt-0 last:pb-0 border-b last:border-0 border-slate-100 dark:border-slate-850"
-            >
-              <div className="relative h-20 w-20 bg-slate-50 dark:bg-slate-950 rounded-xl p-2 flex items-center justify-center border border-slate-100 dark:border-slate-850 shrink-0">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  width={64}
-                  height={64}
-                  className="object-contain max-h-16 drop-shadow-sm"
-                />
-              </div>
+          {cartItems.map((item) => {
+            const priceVal = Number(item.price || 0);
 
-              <div className="flex-1 space-y-1 text-center sm:text-left">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  {item.manufacturer}
-                </span>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-white leading-tight">
-                  {item.title}
-                </h3>
-                <p className="text-xs font-semibold text-slate-550 dark:text-slate-400">
-                  {item.genericName} ({item.strength})
-                </p>
-                <span className="inline-block text-[11px] text-slate-450 dark:text-slate-500">
-                  Seller: <span className="font-semibold text-slate-600 dark:text-slate-400">{item.sellerName}</span>
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-850">
-                <div className="flex items-center border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 h-9 p-1">
-                  <button
-                    onClick={() => updateQuantity(item.id, -1)}
-                    disabled={item.quantity <= 1}
-                    className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-                  >
-                    <Minus className="h-3 w-3" />
-                  </button>
-                  <span className="w-8 text-center text-xs font-bold text-slate-700 dark:text-slate-350">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(item.id, 1)}
-                    disabled={item.quantity >= item.stock}
-                    className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <span className="text-sm font-black text-slate-900 dark:text-white block">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-semibold block">
-                      ${item.price.toFixed(2)} / unit
-                    </span>
+            return (
+              <div
+                key={item.id}
+                className="flex flex-col sm:flex-row items-center gap-4 py-4 first:pt-0 last:pb-0 border-b last:border-0 border-slate-100 dark:border-slate-850"
+              >
+                {item.image && (
+                  <div className="relative h-20 w-20 bg-slate-50 dark:bg-slate-950 rounded-xl p-2 flex items-center justify-center border border-slate-100 dark:border-slate-850 shrink-0">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      width={64}
+                      height={64}
+                      unoptimized
+                      className="object-contain max-h-16 max-w-full drop-shadow-sm"
+                    />
                   </div>
-                  <button
-                    onClick={() => removeItem(item.id, item.title)}
-                    className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-550 transition-colors cursor-pointer"
-                    aria-label="Remove item"
-                  >
-                    <Trash2 className="h-4.5 w-4.5" />
-                  </button>
+                )}
+
+                <div className="flex-1 space-y-1 text-center sm:text-left">
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white leading-tight">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs font-semibold text-slate-550 dark:text-slate-400">
+                    {item.genericName} ({item.strength})
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-850">
+                  <div className="flex items-center border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 h-9 p-1">
+                    <button
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity, -1)}
+                      disabled={item.quantity <= 1}
+                      className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+                    >
+                      <Minus className="h-3 w-3" />
+                    </button>
+                    <span className="w-8 text-center text-xs font-bold text-slate-700 dark:text-slate-350">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity, 1)}
+                      className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 cursor-pointer"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <span className="text-sm font-black text-slate-900 dark:text-white block">
+                        ${(priceVal * item.quantity).toFixed(2)}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-semibold block">
+                        ${priceVal.toFixed(2)} / unit
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveItem(item.id, item.title)}
+                      className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-550 transition-colors cursor-pointer"
+                      aria-label="Remove item"
+                    >
+                      <Trash2 className="h-4.5 w-4.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <Link
-          href="/medicines"
+          href="/shop"
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-teal-650 transition-colors cursor-pointer"
         >
           <ShoppingCart className="h-4.5 w-4.5" />
@@ -240,6 +183,7 @@ export default function CartContainer() {
         </Link>
       </div>
 
+      {/* Order Summary & Checkout */}
       <div className="lg:col-span-5 space-y-6">
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-5 shadow-xs">
           <form onSubmit={handleApplyPromo} className="space-y-3">
@@ -254,7 +198,7 @@ export default function CartContainer() {
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
                 disabled={isPromoApplied}
-                className="flex-1 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 disabled:opacity-50"
+                className="flex-1 px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:border-teal-500 dark:border-slate-800 dark:bg-slate-955 dark:text-slate-200 disabled:opacity-50"
               />
               <Button
                 type="submit"

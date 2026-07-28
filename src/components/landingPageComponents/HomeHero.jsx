@@ -1,6 +1,6 @@
 import React from "react";
 import Button from "../common/Button";
-import { Search, ShieldCheck, Clock, Truck, ArrowRight } from "lucide-react";
+import { ShieldCheck, Clock, Truck, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Reveal from "../common/Reveal";
 import Container from "../common/Container";
@@ -41,22 +41,7 @@ export default function HomeHero() {
               </p>
             </Reveal>
 
-            {/* Search Bar */}
-            <Reveal variant="fade-up" delay={500} duration={900}>
-              <div className="max-w-2xl">
-                <div className="relative flex items-center rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-100/50 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500/20 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none dark:focus-within:border-teal-500/50">
-                  <Search className="ml-3 h-5 w-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search medicines, health products, brands..."
-                    className="w-full border-0 bg-transparent px-3 py-3 text-sm text-slate-850 placeholder:text-slate-400 focus:outline-none focus:ring-0 dark:text-slate-200"
-                  />
-                  <Button variant="primary" size="md" className="shrink-0">
-                    Search
-                  </Button>
-                </div>
-              </div>
-            </Reveal>
+
 
             {/* Features Row */}
             <div className="grid grid-cols-3 gap-6 pt-6 border-t border-slate-100 dark:border-slate-800/80">

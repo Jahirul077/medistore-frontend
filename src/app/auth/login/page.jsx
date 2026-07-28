@@ -66,7 +66,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-[440px] px-4 py-8">
+    <div className="w-full max-w-110 px-4 py-8">
       {/* Outer Card */}
       <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl shadow-slate-200/40 dark:shadow-none space-y-7">
         
@@ -188,7 +188,7 @@ export default function LoginPage() {
         {/* Link to Register page */}
         <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-850">
           <p className="text-xs text-slate-500 dark:text-slate-450">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/auth/register"
               className="text-teal-650 hover:underline font-bold dark:text-teal-400 cursor-pointer"

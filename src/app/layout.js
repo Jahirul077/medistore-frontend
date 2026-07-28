@@ -24,7 +24,7 @@ export default function RootLayout({
         <ReduxProvider>
           <ReactQueryProvider>
             {children}
-            <Toaster richColors position="top-right" />
+            <Toaster richColors position="top-center" />
           </ReactQueryProvider>
         </ReduxProvider>
       </body>

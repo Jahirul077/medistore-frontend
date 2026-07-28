@@ -3,12 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Container from "@/components/common/Container";
 import Button from "@/components/common/Button";
-import {
-  Grid,
-  List,
-  ArrowUpDown,
-  Sliders,
-} from "lucide-react";
+import { Grid, List, Sliders } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -17,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { MEDICINES_DATA } from "./mockData";
+import useGetAllMedicinesQuery from "@/hooks/Medicines/useGetAllMedicinesQuery";
 import FilterSidebar from "@/components/medicines/FilterSidebar";
 import MobileFilterDrawer from "@/components/medicines/MobileFilterDrawer";
 import MedicineGridCard from "@/components/medicines/MedicineGridCard";
@@ -34,6 +29,22 @@ export default function MedicinesPage() {
   const [sortBy, setSortBy] = useState("default");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
+  // Fetch medicines from live API using search & filter params
+  const {
+    data: resData,
+    isLoading,
+    error,
+  } = useGetAllMedicinesQuery({
+    search,
+    categoriesId,
+    manufacturer,
+    minPrice,
+    maxPrice,
+  });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const rawMedicines = resData?.data || [];
+
   const handleClearFilters = () => {
     setSearch("");
     setCategoriesId("");
@@ -43,50 +54,24 @@ export default function MedicinesPage() {
   };
 
   const filteredMedicines = useMemo(() => {
-    let result = [...MEDICINES_DATA];
-
-    if (search.trim()) {
-      const query = search.toLowerCase();
-      result = result.filter(
-        (m) =>
-          m.title.toLowerCase().includes(query) ||
-          m.genericName.toLowerCase().includes(query) ||
-          m.manufacturer.toLowerCase().includes(query)
-      );
-    }
-
-    if (categoriesId) {
-      result = result.filter((m) => m.categoriesId === categoriesId);
-    }
-
-    if (manufacturer && manufacturer !== "all-brands") {
-      result = result.filter((m) => m.manufacturer === manufacturer);
-    }
-
-    if (minPrice) {
-      const min = parseFloat(minPrice);
-      if (!isNaN(min)) {
-        result = result.filter((m) => m.price >= min);
-      }
-    }
-
-    if (maxPrice) {
-      const max = parseFloat(maxPrice);
-      if (!isNaN(max)) {
-        result = result.filter((m) => m.price <= max);
-      }
-    }
+    let result = [...rawMedicines];
 
     if (sortBy === "price-asc") {
-      result.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => {
+        const priceA = Number(a.price || a.inventories?.[0]?.price || 0);
+        const priceB = Number(b.price || b.inventories?.[0]?.price || 0);
+        return priceA - priceB;
+      });
     } else if (sortBy === "price-desc") {
-      result.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "rating") {
-      result.sort((a, b) => b.rating - a.rating);
+      result.sort((a, b) => {
+        const priceA = Number(a.price || a.inventories?.[0]?.price || 0);
+        const priceB = Number(b.price || b.inventories?.[0]?.price || 0);
+        return priceB - priceA;
+      });
     }
 
     return result;
-  }, [search, categoriesId, manufacturer, minPrice, maxPrice, sortBy]);
+  }, [rawMedicines, sortBy]);
 
   const filterProps = {
     search,
@@ -141,8 +126,7 @@ export default function MedicinesPage() {
 
                 <div className="flex items-center gap-3">
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="flex h-9 w-[170px] items-center justify-between whitespace-nowrap rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-955 px-3 pl-8 text-xs font-bold text-slate-650 dark:text-slate-350 shadow-xs focus:ring-1 focus:ring-teal-500 cursor-pointer">
-                      <ArrowUpDown className="h-3.5 w-3.5 text-slate-450 absolute left-2.5 pointer-events-none" />
+                    <SelectTrigger className="flex h-9 w-42.5 items-center justify-between whitespace-nowrap rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-955 px-3 pl-8 text-xs font-bold text-slate-650 dark:text-slate-350 shadow-xs focus:ring-1 focus:ring-teal-500 cursor-pointer">
                       <SelectValue placeholder="Default Sort" />
                     </SelectTrigger>
                     <SelectContent
@@ -152,14 +136,19 @@ export default function MedicinesPage() {
                       sideOffset={8}
                       className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-xl shadow-md p-1 z-50"
                     >
-                      <SelectItem value="default" className="cursor-pointer">Default Sort</SelectItem>
-                      <SelectItem value="price-asc" className="cursor-pointer">Price: Low to High</SelectItem>
-                      <SelectItem value="price-desc" className="cursor-pointer">Price: High to Low</SelectItem>
-                      <SelectItem value="rating" className="cursor-pointer">Popularity (Rating)</SelectItem>
+                      <SelectItem value="default" className="cursor-pointer">
+                        Default Sort
+                      </SelectItem>
+                      <SelectItem value="price-asc" className="cursor-pointer">
+                        Price: Low to High
+                      </SelectItem>
+                      <SelectItem value="price-desc" className="cursor-pointer">
+                        Price: High to Low
+                      </SelectItem>
                     </SelectContent>
                   </Select>
 
-                  <div className="hidden sm:flex border border-slate-100 bg-slate-50 p-1 rounded-xl dark:border-slate-850 dark:bg-slate-950/60">
+                  <div className="hidden sm:flex border border-slate-100 bg-slate-50 p-1 rounded-xl dark:border-slate-855 dark:bg-slate-950/60">
                     <button
                       onClick={() => setViewType("grid")}
                       className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
@@ -187,7 +176,20 @@ export default function MedicinesPage() {
               </div>
             </div>
 
-            {filteredMedicines.length === 0 && (
+            {/* Loading Skeleton */}
+            {isLoading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 animate-pulse">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div
+                    key={i}
+                    className="h-72 rounded-2xl bg-slate-200 dark:bg-slate-800"
+                  ></div>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoading && (error || filteredMedicines.length === 0) && (
               <div className="bg-white dark:bg-slate-900 rounded-3xl p-12 text-center border border-slate-100 dark:border-slate-800 shadow-xs space-y-4">
                 <div className="h-16 w-16 bg-slate-100 dark:bg-slate-950 rounded-full flex items-center justify-center mx-auto">
                   <Sliders className="h-8 w-8 text-slate-400" />
@@ -196,8 +198,9 @@ export default function MedicinesPage() {
                   No Medicines Found
                 </h3>
                 <p className="text-sm text-slate-455 dark:text-slate-550 max-w-sm mx-auto">
-                  We couldn't find any products matching your search criteria.
-                  Try modifying your filters or search keywords.
+                  {error
+                    ? "Failed to load medicines from backend."
+                    : "We couldn't find any products matching your search criteria."}
                 </p>
                 <Button
                   variant="primary"
@@ -210,19 +213,22 @@ export default function MedicinesPage() {
               </div>
             )}
 
-            {viewType === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {filteredMedicines.map((med) => (
-                  <MedicineGridCard key={med.id} med={med} />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredMedicines.map((med) => (
-                  <MedicineListCard key={med.id} med={med} />
-                ))}
-              </div>
-            )}
+            {/* Content List */}
+            {!isLoading &&
+              filteredMedicines.length > 0 &&
+              (viewType === "grid" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {filteredMedicines.map((med) => (
+                    <MedicineGridCard key={med.id} med={med} />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredMedicines.map((med) => (
+                    <MedicineListCard key={med.id} med={med} />
+                  ))}
+                </div>
+              ))}
           </div>
         </div>
       </Container>

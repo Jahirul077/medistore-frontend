@@ -21,38 +21,41 @@ export default function MedicineOverview({ medicine }) {
       {/* Main Product Panel */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-6 md:p-8 shadow-xs space-y-6">
         <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
-          {/* Image Container with Elegant Glass Frame */}
-          <div className="relative w-full max-w-[280px] aspect-square rounded-2xl bg-slate-50 dark:bg-slate-950 p-6 flex items-center justify-center border border-slate-150/50 dark:border-slate-850 shadow-sm shrink-0">
-            <Image
-              src={medicine.image}
-              alt={medicine.title}
-              fill
-              className="object-contain p-6 drop-shadow-md"
-              priority
-            />
-            <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-teal-50/90 dark:bg-teal-950/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-teal-650 dark:text-teal-400">
-              <Layers className="h-3.5 w-3.5" />
-              {medicine.categories?.title || "Capsule"}
+          {/* Image Container with Glass Frame */}
+          {medicine?.image && (
+            <div className="relative w-full max-w-70 aspect-square rounded-2xl bg-slate-50 dark:bg-slate-950 p-6 flex items-center justify-center border border-slate-150/50 dark:border-slate-850 shadow-sm shrink-0">
+              <Image
+                src={medicine.image}
+                alt={medicine?.title || "Medicine"}
+                fill
+                className="object-contain p-6 drop-shadow-md"
+                priority
+                unoptimized
+              />
+              <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-teal-50/90 dark:bg-teal-950/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-teal-650 dark:text-teal-400">
+                <Layers className="h-3.5 w-3.5" />
+                {medicine?.categories?.title || "Medicine"}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Details Meta */}
           <div className="flex-1 space-y-4 text-center md:text-left w-full">
             <div className="space-y-1.5">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500">
                 <Briefcase className="h-3.5 w-3.5 text-teal-505" />
-                {medicine.manufacturer}
+                {medicine?.manufacturer || "Pharmaceuticals"}
               </span>
               <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                {medicine.title}
+                {medicine?.title}
               </h1>
               <div className="inline-block px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-300">
-                {medicine.genericName} • {medicine.strength}
+                {medicine?.genericName} • {medicine?.strength}
               </div>
             </div>
 
             <p className="text-slate-500 dark:text-slate-400 text-sm md:text-[15px] leading-relaxed">
-              {medicine.description}
+              {medicine?.description || "High-quality pharmaceutical medicine formulation."}
             </p>
 
             <div className="flex flex-wrap items-center gap-4 justify-center md:justify-start pt-2">
@@ -103,7 +106,7 @@ export default function MedicineOverview({ medicine }) {
                   Indications
                 </h4>
                 <p className="text-slate-650 dark:text-slate-300 text-[15px] leading-relaxed">
-                  {medicine.description}
+                  {medicine?.description}
                 </p>
               </div>
               <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-slate-800/80">
@@ -112,7 +115,7 @@ export default function MedicineOverview({ medicine }) {
                   Dosage & Administration
                 </h4>
                 <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed">
-                  {medicine.dosage || "As directed by your healthcare specialist."}
+                  {medicine?.dosage || "As directed by a certified healthcare professional."}
                 </p>
               </div>
             </div>
@@ -125,11 +128,8 @@ export default function MedicineOverview({ medicine }) {
                 Common Adverse Effects
               </h4>
               <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed">
-                {medicine.sideEffects || "No severe side effects reported when taken under correct guidelines."}
+                {medicine?.sideEffects || "No severe side effects reported when taken under recommended guidelines."}
               </p>
-              <div className="p-4 bg-amber-50/50 dark:bg-amber-950/15 border border-amber-100 dark:border-amber-900/30 rounded-xl text-amber-800 dark:text-amber-400 text-xs font-semibold leading-relaxed mt-4">
-                Disclaimer: Consult a licensed physician immediately if you experience persistent symptoms, severe stomach discomfort, or allergic skin rashes.
-              </div>
             </div>
           )}
 
@@ -140,11 +140,8 @@ export default function MedicineOverview({ medicine }) {
                   Storage Conditions
                 </h4>
                 <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed">
-                  {medicine.storage || "Store below 30°C in a dry place. Keep protected from light."}
+                  {medicine?.storage || "Store below 30°C in a dry place. Protect from direct light."}
                 </p>
-              </div>
-              <div className="p-4 bg-teal-50/40 dark:bg-teal-950/10 border border-teal-100/60 dark:border-teal-900/20 rounded-xl text-teal-800 dark:text-teal-400 text-xs font-semibold leading-relaxed">
-                Safety Warning: Always verify expiration dates before consumption. Never consume opened packages or damp capsules.
               </div>
             </div>
           )}

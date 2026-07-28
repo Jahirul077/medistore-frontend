@@ -12,17 +12,13 @@ import { logout } from "@/redux/slices/authSlice";
 import { removeLocalStorage } from "@/utils/localStorage";
 import { toast } from "sonner";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-];
-
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const cartItems = useSelector((state) => state.cart.items || []);
   const cartCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
@@ -39,12 +35,16 @@ export default function Navbar() {
   });
 
   useEffect(() => {
+    setIsMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const isLoggedIn = isMounted && (isAuthenticated || user);
+  const displayCartCount = isMounted ? cartCount : 0;
 
   const getDesktopClass = (href) => {
     const isActive = pathname === href;
@@ -89,18 +89,24 @@ export default function Navbar() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className={getDesktopClass(link.href)}>
-                {link.label}
+            <Link href="/" className={getDesktopClass("/")}>
+              Home
+            </Link>
+            <Link href="/shop" className={getDesktopClass("/shop")}>
+              Shop
+            </Link>
+            {isLoggedIn && (
+              <Link href="/orders" className={getDesktopClass("/orders")}>
+                My Orders
               </Link>
-            ))}
+            )}
             {/* Cart Link */}
             <Link href="/cart" className={`relative flex items-center gap-1.5 ${getDesktopClass("/cart")}`}>
               <ShoppingCart className="h-5 w-5" />
               <span>Cart</span>
-              {cartCount > 0 && (
+              {displayCartCount > 0 && (
                 <span className="absolute -top-2.5 -right-3 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
-                  {cartCount}
+                  {displayCartCount}
                 </span>
               )}
             </Link>
@@ -108,7 +114,7 @@ export default function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            {isAuthenticated || user ? (
+            {isLoggedIn ? (
               <div className="flex items-center gap-3">
                 {(user?.role === "ADMIN" || user?.role === "SELLER") && (
                   <Link href={dashboardPath}>
@@ -153,18 +159,19 @@ export default function Navbar() {
 
       {/* Mobile Drawer Navigation */}
       {isOpen && (
-        <div className="md:hidden border-b border-slate-100 bg-white px-4 pt-2 pb-6 shadow-lg dark:border-slate-900 dark:bg-slate-950 animate-slide-in">
+        <div className="md:hidden border-b border-slate-100 bg-white px-4 pt-2 pb-6 shadow-lg dark:border-slate-900 dark:bg-slate-955 animate-slide-in">
           <nav className="flex flex-col gap-4">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className={getMobileClass(link.href)}
-              >
-                {link.label}
+            <Link href="/" onClick={() => setIsOpen(false)} className={getMobileClass("/")}>
+              Home
+            </Link>
+            <Link href="/shop" onClick={() => setIsOpen(false)} className={getMobileClass("/shop")}>
+              Shop
+            </Link>
+            {isLoggedIn && (
+              <Link href="/orders" onClick={() => setIsOpen(false)} className={getMobileClass("/orders")}>
+                My Orders
               </Link>
-            ))}
+            )}
             {/* Cart Link */}
             <Link
               href="/cart"
@@ -175,16 +182,16 @@ export default function Navbar() {
                 <ShoppingCart className="h-5 w-5" />
                 Cart
               </span>
-              {cartCount > 0 && (
+              {displayCartCount > 0 && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
-                  {cartCount}
+                  {displayCartCount}
                 </span>
               )}
             </Link>
 
             {/* Mobile Actions */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-900">
-              {isAuthenticated || user ? (
+              {isLoggedIn ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900">
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{user?.name}</span>
@@ -193,7 +200,7 @@ export default function Navbar() {
                         setIsOpen(false);
                         performLogout();
                       }}
-                      className="text-xs text-rose-600 font-bold flex items-center gap-1"
+                      className="text-xs text-rose-600 font-bold flex items-center gap-1 cursor-pointer"
                     >
                       <LogOut className="h-3.5 w-3.5" /> Logout
                     </button>

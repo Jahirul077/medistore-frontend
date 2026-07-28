@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Search, Layers, Briefcase, DollarSign, SlidersHorizontal } from "lucide-react";
 import {
@@ -7,7 +9,8 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { CATEGORIES, MANUFACTURERS } from "@/app/(main)/shop/mockData";
+import useGetAllCategoriesQuery from "@/hooks/Medicines/useGetAllCategoriesQuery";
+import { MANUFACTURERS } from "@/app/(main)/shop/mockData";
 
 export default function FilterSidebar({
   search,
@@ -22,6 +25,9 @@ export default function FilterSidebar({
   setMaxPrice,
   handleClearFilters,
 }) {
+  const { data: resCategories } = useGetAllCategoriesQuery();
+  const categoriesList = resCategories?.data || [];
+
   return (
     <aside className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-6 space-y-6 shadow-xs h-fit">
       {/* Title */}
@@ -62,7 +68,7 @@ export default function FilterSidebar({
           <Layers className="h-3.5 w-3.5" />
           Category
         </label>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
           <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-350 cursor-pointer">
             <input
               type="radio"
@@ -73,7 +79,7 @@ export default function FilterSidebar({
             />
             <span>All Categories</span>
           </label>
-          {CATEGORIES.map((cat) => (
+          {categoriesList.map((cat) => (
             <label
               key={cat.id}
               className="flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-350 cursor-pointer"
