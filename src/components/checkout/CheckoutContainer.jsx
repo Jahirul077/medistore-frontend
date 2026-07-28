@@ -1,308 +1,324 @@
 "use client";
 
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import Link from "next/link";
+import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
-import { CreditCard, Truck, MapPin, Wallet, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
-import Button from "@/components/common/Button";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-
+import { ShoppingBag, ArrowLeft, CreditCard, Truck, ShieldCheck, CheckCircle2 } from "lucide-react";
+import Button from "@/components/common/Button";
+import { clearCart } from "@/redux/slices/cartSlice";
 import useCreateOrderMutation from "@/hooks/Orders/useCreateOrderMutation";
 import useCreatePaymentMutation from "@/hooks/Payment/useCreatePaymentMutation";
-import { clearCart } from "@/redux/slices/cartSlice";
 
 export default function CheckoutContainer() {
-  const router = useRouter();
   const dispatch = useDispatch();
-  const cartItems = useSelector((state) => state.cart.items || []);
-  const { user } = useSelector((state) => state.auth || {});
+  const rawCartItems = useSelector((state) => state.cart?.cartItems);
+  const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
+  const [paymentMethod, setPaymentMethod] = useState("card");
 
-  const [paymentMethod, setPaymentMethod] = useState("card"); // "card", "cod"
-
-  // Payment Mutation Hook
-  const { mutate: createPayment, isPending: isPaymentPending } = useCreatePaymentMutation({
-    onSuccess: (res) => {
-      const paymentUrl = res?.data?.paymentUrl || res?.paymentUrl;
-      dispatch(clearCart());
-      toast.success("Order & Payment Session created! Redirecting to payment portal...");
-      
-      if (paymentUrl) {
-        window.location.href = paymentUrl;
-      } else {
-        router.push("/payment/success");
-      }
-    },
-    onError: (err) => {
-      toast.error(err?.message || "Failed to initialize payment gateway. Please try again.");
-    },
-  });
-
-  // Order Mutation Hook
-  const { mutate: createOrder, isPending: isOrderPending } = useCreateOrderMutation({
-    onSuccess: (res) => {
-      const createdOrder = res?.data;
-      const orderId = createdOrder?.id;
-
-      if (!orderId) {
-        toast.error("Order created but Order ID is missing.");
-        return;
-      }
-
-      if (paymentMethod === "card") {
-        const origin = window.location.origin;
-        createPayment({
-          orderId,
-          successUrl: `${origin}/payment/success`,
-          cancelUrl: `${origin}/payment/cancel`,
-        });
-      } else {
-        dispatch(clearCart());
-        toast.success(res?.message || "Order placed successfully!");
-        router.push("/payment/success");
-      }
-    },
-    onError: (err) => {
-      toast.error(err?.message || "Failed to place order. Please check item availability.");
-    },
-  });
-
+  // React Hook Form
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    defaultValues: {
-      fullName: user?.name || "",
-      phone: user?.phone || "",
-      email: user?.email || "",
-      address: "",
-      city: "Dhaka",
-      zip: "1212",
-    },
-  });
+  } = useForm();
 
-  const isPending = isOrderPending || isPaymentPending;
+  // Create Order Mutation
+  const { mutateAsync: createOrder, isPending: isOrdering } = useCreateOrderMutation();
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
-  const shipping = subtotal > 30 || subtotal === 0 ? 0 : 5.0;
-  const total = subtotal + shipping;
+  // Create Payment Mutation
+  const { mutateAsync: createPayment, isPending: isPaying } = useCreatePaymentMutation();
 
-  const onSubmit = (data) => {
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
+  const isPending = isOrdering || isPaying;
+
+  const onSubmit = async (data) => {
     if (cartItems.length === 0) {
-      toast.error("Your cart is empty! Add products before checking out.");
+      toast.error("Your cart is empty.");
       return;
     }
 
-    const orderData = {
-      shipping_Address: `${data.address}, ${data.city} - ${data.zip}`,
-      items: cartItems.map((item) => ({
-        SellerInventoryId: item.sellerInventoryId || item.inventories?.[0]?.id || item.id,
-        quantity: Number(item.quantity || 1),
-      })),
-    };
+    try {
+      const fullShippingAddress = `${data.address}, ${data.city}${data.zip ? ` - ${data.zip}` : ""}`;
+      
+      const payloadItems = cartItems.map((item) => ({
+        sellerInventoryId: item.sellerInventoryId || item.id,
+        quantity: item.quantity,
+      }));
 
-    createOrder(orderData);
+      // Step 1: Create Order in backend
+      const orderRes = await createOrder({
+        shipping_Address: fullShippingAddress,
+        items: payloadItems,
+      });
+
+      const orderData = orderRes?.data || orderRes;
+      const orderId = orderData?.id;
+
+      if (!orderId) {
+        throw new Error(orderRes?.message || "Order creation failed.");
+      }
+
+      toast.success("Order placed successfully!");
+
+      // Step 2: Handle Stripe Checkout redirect if payment method is "card"
+      if (paymentMethod === "card") {
+        toast.loading("Redirecting to Stripe payment gateway...");
+        const paymentRes = await createPayment({ orderId });
+        const checkoutUrl = paymentRes?.data?.url || paymentRes?.url;
+
+        if (checkoutUrl) {
+          dispatch(clearCart());
+          window.location.href = checkoutUrl;
+          return;
+        }
+      }
+
+      // If COD or Fallback
+      dispatch(clearCart());
+      window.location.href = `/orders/${orderId}`;
+    } catch (err) {
+      toast.error(err?.message || "Checkout failed. Please try again.");
+    }
   };
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      {/* Left Column: Form */}
-      <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-        <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          
-          {/* Shipping Address Section */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-800 shadow-xs">
-            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 mb-6">
-              <MapPin className="h-5 w-5 text-teal-500" />
-              Shipping Information
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Full Name */}
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. John Doe"
-                  disabled={isPending}
-                  {...register("fullName", { required: "Full name is required" })}
-                  className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
-                    errors.fullName ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
-                  }`}
-                />
-                {errors.fullName && <span className="text-xs text-rose-500 font-semibold">{errors.fullName.message}</span>}
-              </div>
-
-              {/* Phone */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  placeholder="e.g. +880 1712..."
-                  disabled={isPending}
-                  {...register("phone", { required: "Phone number is required" })}
-                  className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
-                    errors.phone ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
-                  }`}
-                />
-                {errors.phone && <span className="text-xs text-rose-500 font-semibold">{errors.phone.message}</span>}
-              </div>
-
-              {/* Email */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  placeholder="Optional"
-                  disabled={isPending}
-                  {...register("email")}
-                  className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
-                />
-              </div>
-
-              {/* Address */}
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Street Address
-                </label>
-                <input
-                  type="text"
-                  placeholder="House, Road, Block, Area"
-                  disabled={isPending}
-                  {...register("address", { required: "Address is required" })}
-                  className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
-                    errors.address ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
-                  }`}
-                />
-                {errors.address && <span className="text-xs text-rose-500 font-semibold">{errors.address.message}</span>}
-              </div>
-
-              {/* City */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  City
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Dhaka"
-                  disabled={isPending}
-                  {...register("city", { required: "City is required" })}
-                  className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
-                />
-              </div>
-
-              {/* ZIP */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  ZIP Code
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 1212"
-                  disabled={isPending}
-                  {...register("zip")}
-                  className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Methods Section */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-800 shadow-xs">
-            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 mb-6">
-              <Wallet className="h-5 w-5 text-teal-500" />
-              Payment Method
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label 
-                className={`relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                  paymentMethod === "card" ? "border-teal-500 bg-teal-50/50 dark:bg-teal-900/20" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                }`}
-              >
-                <input type="radio" name="payment" className="hidden" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} />
-                {paymentMethod === "card" && <CheckCircle2 className="absolute top-3 right-3 h-4 w-4 text-teal-500" />}
-                <CreditCard className={`h-8 w-8 mb-2 ${paymentMethod === "card" ? "text-teal-500" : "text-slate-400"}`} />
-                <span className={`text-sm font-bold ${paymentMethod === "card" ? "text-slate-900 dark:text-white" : "text-slate-500"}`}>Online Payment (Stripe)</span>
-              </label>
-
-              <label 
-                className={`relative flex flex-col items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                  paymentMethod === "cod" ? "border-teal-500 bg-teal-50/50 dark:bg-teal-900/20" : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                }`}
-              >
-                <input type="radio" name="payment" className="hidden" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} />
-                {paymentMethod === "cod" && <CheckCircle2 className="absolute top-3 right-3 h-4 w-4 text-teal-500" />}
-                <Truck className={`h-8 w-8 mb-2 ${paymentMethod === "cod" ? "text-teal-500" : "text-slate-400"}`} />
-                <span className={`text-sm font-bold ${paymentMethod === "cod" ? "text-slate-900 dark:text-white" : "text-slate-500"}`}>Cash on Delivery</span>
-              </label>
-            </div>
-          </div>
-        </form>
+  if (cartItems.length === 0) {
+    return (
+      <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-5">
+        <div className="h-20 w-20 bg-slate-50 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto">
+          <ShoppingBag size={36} />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Your Cart is Empty</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
+            Add items to your cart before proceeding to checkout.
+          </p>
+        </div>
+        <Link href="/shop" className="inline-block pt-2">
+          <Button variant="primary" size="md" icon={<ArrowLeft size={16} />} className="cursor-pointer font-medium">
+            Return to Shop
+          </Button>
+        </Link>
       </div>
+    );
+  }
 
-      {/* Right Column: Order Summary */}
-      <div className="lg:col-span-5 xl:col-span-4">
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-800 shadow-xs sticky top-28 space-y-6">
-          <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">Order Summary</h2>
-          
-          <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-            {cartItems.map((item) => (
-              <div key={item.id} className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-850 last:border-0 last:pb-0">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">{item.title}</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-455 mt-0.5">Qty: {item.quantity}</p>
-                </div>
-                <span className="text-sm font-black text-slate-900 dark:text-white">
-                  ${((Number(item.price) || 0) * item.quantity).toFixed(2)}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-            <div className="flex justify-between text-sm font-semibold text-slate-500 dark:text-slate-400">
-              <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Left Column: Delivery Info & Payment Selection */}
+      <div className="lg:col-span-7 space-y-6">
+        {/* Shipping Form Card */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+          <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="p-2.5 bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400 rounded-2xl">
+              <Truck size={20} />
             </div>
-            <div className="flex justify-between text-sm font-semibold text-slate-500 dark:text-slate-400">
-              <span>Shipping Fee</span>
-              <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
-            </div>
-            <div className="pt-3 flex justify-between items-end border-t border-slate-100 dark:border-slate-800">
-              <span className="text-base font-bold text-slate-900 dark:text-white">Total Amount</span>
-              <span className="text-2xl font-black text-teal-600 dark:text-teal-400">
-                ${total.toFixed(2)}
-              </span>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Shipping Address</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Where should we deliver your medicine order?</p>
             </div>
           </div>
 
-          <div className="pt-2">
-            <Button
-              type="submit"
-              form="checkout-form"
-              variant="primary"
-              disabled={isPending || cartItems.length === 0}
-              icon={!isPending && <ArrowRight className="h-4 w-4" />}
-              className="w-full h-12 rounded-2xl text-sm font-bold shadow-lg shadow-teal-500/20 cursor-pointer"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Full Name */}
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Full Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. John Doe"
+                disabled={isPending}
+                {...register("fullName", { required: "Full name is required" })}
+                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
+                  errors.fullName ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                }`}
+              />
+              {errors.fullName && <span className="text-xs text-rose-500 font-semibold">{errors.fullName.message}</span>}
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                placeholder="e.g. +880 1712..."
+                disabled={isPending}
+                {...register("phone", { required: "Phone number is required" })}
+                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
+                  errors.phone ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                }`}
+              />
+              {errors.phone && <span className="text-xs text-rose-500 font-semibold">{errors.phone.message}</span>}
+            </div>
+
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="Optional"
+                disabled={isPending}
+                {...register("email")}
+                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
+              />
+            </div>
+
+            {/* Address */}
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Street Address
+              </label>
+              <input
+                type="text"
+                placeholder="House, Road, Block, Area"
+                disabled={isPending}
+                {...register("address", { required: "Address is required" })}
+                className={`w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none transition-all ${
+                  errors.address ? "border-rose-450 focus:border-rose-450 focus:ring-1 focus:ring-rose-500/20" : "border-slate-200 dark:border-slate-800 focus:border-teal-500"
+                }`}
+              />
+              {errors.address && <span className="text-xs text-rose-500 font-semibold">{errors.address.message}</span>}
+            </div>
+
+            {/* City */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                City
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Dhaka"
+                disabled={isPending}
+                {...register("city", { required: "City is required" })}
+                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
+              />
+            </div>
+
+            {/* ZIP */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                ZIP Code
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 1212"
+                disabled={isPending}
+                {...register("zip")}
+                className="w-full px-4 py-2.5 rounded-2xl border text-sm bg-slate-50 dark:bg-slate-950 focus:outline-none border-slate-200 dark:border-slate-800 focus:border-teal-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Method Selector Card */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs">
+          <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="p-2.5 bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400 rounded-2xl">
+              <CreditCard size={20} />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Payment Method</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Select how you would like to pay for this order.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div
+              onClick={() => setPaymentMethod("card")}
+              className={`p-4 rounded-2xl border-2 flex items-center gap-3 cursor-pointer transition-all ${
+                paymentMethod === "card"
+                  ? "border-teal-500 bg-teal-50/30 dark:bg-teal-950/20"
+                  : "border-slate-100 dark:border-slate-800 hover:border-slate-200"
+              }`}
             >
-              {isPending ? "Processing Order & Payment..." : "Place Order"}
-            </Button>
-            
-            <div className="flex items-center justify-center gap-1.5 mt-4 text-xs font-semibold text-slate-400">
-              <ShieldCheck className="h-4 w-4 text-teal-500" />
-              Secure 256-bit SSL Encryption
+              <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "card" ? "border-teal-500 bg-teal-500" : "border-slate-300"}`}>
+                {paymentMethod === "card" && <div className="h-2 w-2 bg-white rounded-full" />}
+              </div>
+              <span className={`text-sm font-semibold ${paymentMethod === "card" ? "text-slate-900 dark:text-white" : "text-slate-600"}`}>Online Payment (Stripe)</span>
+            </div>
+
+            <div
+              onClick={() => setPaymentMethod("cod")}
+              className={`p-4 rounded-2xl border-2 flex items-center gap-3 cursor-pointer transition-all ${
+                paymentMethod === "cod"
+                  ? "border-teal-500 bg-teal-50/30 dark:bg-teal-950/20"
+                  : "border-slate-100 dark:border-slate-800 hover:border-slate-200"
+              }`}
+            >
+              <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "cod" ? "border-teal-500 bg-teal-500" : "border-slate-300"}`}>
+                {paymentMethod === "cod" && <div className="h-2 w-2 bg-white rounded-full" />}
+              </div>
+              <span className={`text-sm font-semibold ${paymentMethod === "cod" ? "text-slate-900 dark:text-white" : "text-slate-600"}`}>Cash on Delivery</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Right Column: Order Items Summary */}
+      <div className="lg:col-span-5 space-y-6">
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs sticky top-24">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white pb-3 border-b border-slate-100 dark:border-slate-800">
+            Order Summary ({cartItems.length} items)
+          </h3>
+
+          {/* Cart Item Row List */}
+          <div className="space-y-4 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+            {cartItems.map((item) => (
+              <div key={item.id} className="flex items-center gap-3.5 pb-3 border-b border-slate-50 dark:border-slate-800/50">
+                {item.image && (
+                  <div className="h-12 w-12 bg-slate-50 dark:bg-slate-955 rounded-xl p-1 border border-slate-100 dark:border-slate-850 shrink-0 flex items-center justify-center">
+                    <Image src={item.image} alt={item.title} width={44} height={44} unoptimized className="object-contain max-h-full" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{item.title}</h4>
+                  <span className="text-[11px] text-slate-400">Qty: {item.quantity} × ${item.price.toFixed(2)}</span>
+                </div>
+                <span className="text-xs font-bold text-slate-900 dark:text-white">${(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Subtotal Calculations */}
+          <div className="space-y-2.5 pt-2 text-xs text-slate-500 dark:text-slate-400">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">${subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping Fee</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-medium">Free</span>
+            </div>
+            <div className="flex justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-sm">
+              <span className="font-bold text-slate-900 dark:text-white">Total Amount</span>
+              <span className="font-extrabold text-teal-600 dark:text-teal-400 text-lg">${subtotal.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            disabled={isPending}
+            icon={<CheckCircle2 size={18} />}
+            className="w-full h-12 rounded-2xl text-sm font-semibold shadow-lg shadow-teal-500/20 cursor-pointer"
+          >
+            {isPending ? "Processing Order..." : paymentMethod === "card" ? "Proceed to Stripe Payment" : "Place Cash Order"}
+          </Button>
+
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+            <ShieldCheck size={14} className="text-teal-500" />
+            <span>256-bit Encrypted Secure Checkout</span>
+          </div>
+        </div>
+      </div>
+    </form>
   );
 }

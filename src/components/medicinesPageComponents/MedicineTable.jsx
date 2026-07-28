@@ -10,22 +10,22 @@ export default function MedicineTable({ filteredMedicines, onEdit, onDelete }) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b dark:border-slate-800/50">
-              <th className="py-4 px-6 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <th className="py-4 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Medicine
               </th>
-              <th className="py-4 px-6 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <th className="py-4 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Dosage / Form
               </th>
-              <th className="py-4 px-6 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <th className="py-4 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Category
               </th>
-              <th className="py-4 px-6 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <th className="py-4 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Price
               </th>
-              <th className="py-4 px-6 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <th className="py-4 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Stock Level
               </th>
-              <th className="py-4 px-6 text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">
+              <th className="py-4 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">
                 Actions
               </th>
             </tr>
@@ -44,13 +44,13 @@ export default function MedicineTable({ filteredMedicines, onEdit, onDelete }) {
                     {/* Name & Generic & Company */}
                     <td className="py-4 px-6">
                       <div className="flex flex-col">
-                        <span className="text-base font-semibold text-slate-800 dark:text-slate-200">
+                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
                           {med.name}
                         </span>
-                        <span className="text-sm font-normal text-slate-500 dark:text-slate-400 italic mt-0.5">
+                        <span className="text-xs font-normal text-slate-500 dark:text-slate-400 italic mt-0.5">
                           {med.generic}
                         </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        <span className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                           {med.company}
                         </span>
                       </div>
@@ -58,21 +58,21 @@ export default function MedicineTable({ filteredMedicines, onEdit, onDelete }) {
 
                     {/* Dosage Form */}
                     <td className="py-4 px-6">
-                      <span className="inline-flex px-2.5 py-1 rounded-lg text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border dark:border-slate-700/50">
+                      <span className="inline-flex px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border dark:border-slate-700/50">
                         {med.dosage}
                       </span>
                     </td>
 
                     {/* Category */}
                     <td className="py-4 px-6">
-                      <span className="text-base font-normal text-slate-700 dark:text-slate-300">
+                      <span className="text-sm font-normal text-slate-700 dark:text-slate-300">
                         {med.category}
                       </span>
                     </td>
 
                     {/* Price */}
                     <td className="py-4 px-6">
-                      <span className="text-base font-semibold text-slate-900 dark:text-white">
+                      <span className="text-sm font-semibold text-slate-900 dark:text-white">
                         ${med.price.toFixed(2)}
                       </span>
                     </td>
@@ -82,7 +82,7 @@ export default function MedicineTable({ filteredMedicines, onEdit, onDelete }) {
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center gap-1.5">
                           <span
-                            className={`text-base font-semibold ${
+                            className={`text-sm font-medium ${
                               isOutOfStock
                                 ? "text-rose-600 dark:text-rose-400"
                                 : isLowStock

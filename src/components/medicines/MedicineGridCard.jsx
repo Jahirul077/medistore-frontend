@@ -37,7 +37,7 @@ export default function MedicineGridCard({ med }) {
       {/* Top Image & Details */}
       <div>
         <div className="relative aspect-4/3 w-full bg-slate-50 dark:bg-slate-955 p-5 flex items-center justify-center rounded-2xl border border-slate-100 dark:border-slate-850">
-          <span className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-xs font-bold text-teal-700 dark:text-teal-400 px-3 py-1 rounded-full shadow-xs">
+          <span className="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-teal-700 dark:text-teal-400 px-3 py-1 rounded-full shadow-xs">
             {med.categories?.title || "Medicine"}
           </span>
           {med.image && (
@@ -55,13 +55,13 @@ export default function MedicineGridCard({ med }) {
         {/* Content Area */}
         <div className="p-5 space-y-3">
           <div className="space-y-1">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
               {med.manufacturer || med.genericName || "Pharmaceuticals"}
             </span>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white leading-snug group-hover:text-teal-600 transition-colors">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white leading-snug group-hover:text-teal-600 transition-colors">
               {med.title}
             </h3>
-            <p className="text-sm font-semibold text-slate-600 dark:text-slate-350 italic">
+            <p className="text-xs font-normal text-slate-500 dark:text-slate-400 italic">
               {med.genericName} ({med.strength})
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function MedicineGridCard({ med }) {
       {/* Pricing and Action Buttons */}
       <div className="p-5 pt-0">
         <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 gap-2">
-          <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+          <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
             {priceDisplay}
           </span>
           <div className="flex items-center gap-2">
@@ -80,7 +80,7 @@ export default function MedicineGridCard({ med }) {
               variant="primary"
               size="sm"
               icon={<ShoppingCart className="h-4 w-4" />}
-              className="h-9 px-3.5 rounded-xl text-xs font-bold cursor-pointer"
+              className="h-9 px-3.5 rounded-xl text-xs font-medium cursor-pointer"
             >
               Add
             </Button>
@@ -88,7 +88,7 @@ export default function MedicineGridCard({ med }) {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 px-3.5 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold transition-colors duration-250 cursor-pointer dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="h-9 px-3.5 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-medium transition-colors duration-250 cursor-pointer dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Details
               </Button>

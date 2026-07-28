@@ -1,62 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Package, Plus } from "lucide-react";
 import Link from "next/link";
 import Button from "@/components/common/Button";
 import StatsCards from "@/components/dashboardPageComponents/StatsCards";
 import SalesChart from "@/components/dashboardPageComponents/SalesChart";
 import RecentOrdersTable from "@/components/dashboardPageComponents/RecentOrdersTable";
-
-// Mock Data for Recent Orders
-const initialRecentOrders = [
-  {
-    id: "ORD-9821",
-    customer: "Amit Hasan",
-    date: "10 mins ago",
-    items: "Paracetamol 500mg x3, Napa Extra x2",
-    amount: "$24.50",
-    status: "Pending",
-  },
-  {
-    id: "ORD-9820",
-    customer: "Sarah Khan",
-    date: "1 hour ago",
-    items: "Amoxicillin 250mg x1, Azithromycin x1",
-    amount: "$42.00",
-    status: "Processing",
-  },
-  {
-    id: "ORD-9819",
-    customer: "Rafiqul Islam",
-    date: "3 hours ago",
-    items: "Metformin 850mg x5",
-    amount: "$15.90",
-    status: "Delivered",
-  },
-  {
-    id: "ORD-9818",
-    customer: "Nusrat Jahan",
-    date: "Yesterday",
-    items: "Atorvastatin 10mg x2, Sergel 20mg x3",
-    amount: "$88.00",
-    status: "Delivered",
-  },
-];
+import useGetSellerStatsQuery from "@/hooks/Seller/useGetSellerStatsQuery";
 
 export default function SellerDashboard() {
-  const [orders, setOrders] = useState(initialRecentOrders);
+  const { data: resData, isLoading, error } = useGetSellerStatsQuery();
+  const stats = resData?.data || {};
 
-  // Quick Action: Simulate accepting a pending order
-  const handleAcceptOrder = (orderId) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((ord) =>
-        ord.id === orderId ? { ...ord, status: "Processing" } : ord
-      )
-    );
-  };
+  const medicinesCount = stats.medicinesCount || 0;
+  const pendingOrdersCount = stats.pendingOrdersCount || 0;
+  const completedOrdersCount = stats.completedOrdersCount || 0;
+  const totalRevenue = Number(stats.totalRevenue || 0);
 
-  const pendingCount = orders.filter((o) => o.status === "Pending").length;
+  const rawOrders = stats.recentOrders || [];
+
+  const formattedRecentOrders = rawOrders.map((order) => {
+    const customerName = order.customer?.name || "Customer";
+    const dateStr = order.createdAt
+      ? new Date(order.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })
+      : "Recent";
+
+    const itemsSummary = order.orderItems
+      ?.map((item) => {
+        const medTitle = item.sellerInventory?.medicines?.title || "Item";
+        return `${medTitle} x${item.quantity}`;
+      })
+      .join(", ") || "Medicine Items";
+
+    const amountStr = `$${Number(order.totalAmount || 0).toFixed(2)}`;
+
+    return {
+      id: order.id.slice(0, 8),
+      fullId: order.id,
+      customer: customerName,
+      date: dateStr,
+      items: itemsSummary,
+      amount: amountStr,
+      status: order.status || "PLACED",
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -94,19 +85,32 @@ export default function SellerDashboard() {
         </div>
       </div>
 
+      {/* Loading Skeleton */}
+      {isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 animate-pulse">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-36 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+          ))}
+        </div>
+      )}
+
       {/* Analytics Stats Grid component */}
-      <StatsCards
-        pendingOrdersCount={pendingCount}
-        medicinesCount={184}
-        totalRevenue={14245.5}
-        completedOrdersCount={1104}
-      />
+      {!isLoading && (
+        <StatsCards
+          pendingOrdersCount={pendingOrdersCount}
+          medicinesCount={medicinesCount}
+          totalRevenue={totalRevenue}
+          completedOrdersCount={completedOrdersCount}
+        />
+      )}
 
       {/* Charts Section component */}
       <SalesChart />
 
       {/* Recent Orders log component */}
-      <RecentOrdersTable orders={orders} onAcceptOrder={handleAcceptOrder} />
+      {!isLoading && (
+        <RecentOrdersTable orders={formattedRecentOrders} />
+      )}
     </div>
   );
 }

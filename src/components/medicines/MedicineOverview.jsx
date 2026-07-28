@@ -32,7 +32,7 @@ export default function MedicineOverview({ medicine }) {
                 priority
                 unoptimized
               />
-              <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-teal-50/90 dark:bg-teal-950/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-teal-650 dark:text-teal-400">
+              <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-teal-50/90 dark:bg-teal-950/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-teal-650 dark:text-teal-400">
                 <Layers className="h-3.5 w-3.5" />
                 {medicine?.categories?.title || "Medicine"}
               </div>
@@ -42,14 +42,14 @@ export default function MedicineOverview({ medicine }) {
           {/* Details Meta */}
           <div className="flex-1 space-y-4 text-center md:text-left w-full">
             <div className="space-y-1.5">
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-455 dark:text-slate-500">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-455 dark:text-slate-500">
                 <Briefcase className="h-3.5 w-3.5 text-teal-505" />
                 {medicine?.manufacturer || "Pharmaceuticals"}
               </span>
-              <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
                 {medicine?.title}
               </h1>
-              <div className="inline-block px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-300">
+              <div className="inline-block px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300">
                 {medicine?.genericName} • {medicine?.strength}
               </div>
             </div>
@@ -59,11 +59,11 @@ export default function MedicineOverview({ medicine }) {
             </p>
 
             <div className="flex flex-wrap items-center gap-4 justify-center md:justify-start pt-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-605 dark:text-teal-400">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-teal-605 dark:text-teal-400">
                 <ShieldCheck className="h-4.5 w-4.5" />
                 100% Authentic Product
               </div>
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-650 dark:text-teal-400">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-teal-650 dark:text-teal-400">
                 <Truck className="h-4.5 w-4.5" />
                 Fast Pharmacy Delivery
               </div>
@@ -85,7 +85,7 @@ export default function MedicineOverview({ medicine }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   activeTab === tab.id
                     ? "bg-white text-teal-605 shadow-sm dark:bg-slate-900 dark:text-teal-400"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-350"
@@ -102,19 +102,19 @@ export default function MedicineOverview({ medicine }) {
           {activeTab === "description" && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Indications
                 </h4>
-                <p className="text-slate-650 dark:text-slate-300 text-[15px] leading-relaxed">
+                <p className="text-slate-650 dark:text-slate-300 text-sm leading-relaxed">
                   {medicine?.description}
                 </p>
               </div>
               <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-slate-800/80">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                   Dosage & Administration
                 </h4>
-                <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                   {medicine?.dosage || "As directed by a certified healthcare professional."}
                 </p>
               </div>
@@ -123,11 +123,11 @@ export default function MedicineOverview({ medicine }) {
 
           {activeTab === "side-effects" && (
             <div className="space-y-3">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <AlertCircle className="h-4.5 w-4.5 text-amber-505" />
                 Common Adverse Effects
               </h4>
-              <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                 {medicine?.sideEffects || "No severe side effects reported when taken under recommended guidelines."}
               </p>
             </div>
@@ -136,10 +136,10 @@ export default function MedicineOverview({ medicine }) {
           {activeTab === "storage" && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Storage Conditions
                 </h4>
-                <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
                   {medicine?.storage || "Store below 30°C in a dry place. Protect from direct light."}
                 </p>
               </div>

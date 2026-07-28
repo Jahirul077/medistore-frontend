@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Plus, Filter } from "lucide-react";
 import Button from "@/components/common/Button";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -13,154 +13,118 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Import modular sub-components
 import MedicineTable from "@/components/medicinesPageComponents/MedicineTable";
 import AddEditMedicineModal from "@/components/medicinesPageComponents/AddEditMedicineModal";
 import DeleteConfirmModal from "@/components/medicinesPageComponents/DeleteConfirmModal";
 import Pagination from "@/components/common/Pagination";
-
-// Mock initial inventory (increased to show pagination)
-const initialMedicines = [
-  {
-    id: "MED-001",
-    name: "Napa Extra",
-    generic: "Paracetamol + Caffeine",
-    category: "Painkiller",
-    price: 2.5,
-    stock: 120,
-    dosage: "Tablet",
-    company: "Beximco Pharmaceuticals",
-  },
-  {
-    id: "MED-002",
-    name: "Sergel 20",
-    generic: "Esomeprazole",
-    category: "Proton Pump Inhibitor",
-    price: 7.0,
-    stock: 8,
-    dosage: "Capsule",
-    company: "Healthcare Pharmaceuticals",
-  },
-  {
-    id: "MED-003",
-    name: "Fexo 120",
-    generic: "Fexofenadine Hydrochloride",
-    category: "Antihistamine",
-    price: 8.0,
-    stock: 45,
-    dosage: "Tablet",
-    company: "Square Pharmaceuticals",
-  },
-  {
-    id: "MED-004",
-    name: "Azithrocin 500",
-    generic: "Azithromycin Dihydrate",
-    category: "Antibiotic",
-    price: 35.0,
-    stock: 60,
-    dosage: "Tablet",
-    company: "Incepta Pharmaceuticals",
-  },
-  {
-    id: "MED-005",
-    name: "Ace Plus",
-    generic: "Paracetamol + Caffeine",
-    category: "Painkiller",
-    price: 3.0,
-    stock: 0,
-    dosage: "Tablet",
-    company: "Square Pharmaceuticals",
-  },
-  {
-    id: "MED-006",
-    name: "Bextrum Gold",
-    generic: "Multivitamin & Multimineral",
-    category: "Vitamin",
-    price: 12.5,
-    stock: 95,
-    dosage: "Tablet",
-    company: "Beximco Pharmaceuticals",
-  },
-  {
-    id: "MED-007",
-    name: "Ceevit 250mg",
-    generic: "Ascorbic Acid (Vitamin C)",
-    category: "Vitamin",
-    price: 1.2,
-    stock: 250,
-    dosage: "Tablet",
-    company: "Square Pharmaceuticals",
-  },
-  {
-    id: "MED-008",
-    name: "Tofen 1mg",
-    generic: "Ketotifen",
-    category: "Antihistamine",
-    price: 3.5,
-    stock: 80,
-    dosage: "Syrup",
-    company: "Incepta Pharmaceuticals",
-  },
-  {
-    id: "MED-009",
-    name: "Entacyd Plus",
-    generic: "Magnesium + Aluminium Hydroxide",
-    category: "Painkiller",
-    price: 2.0,
-    stock: 140,
-    dosage: "Suspension",
-    company: "Square Pharmaceuticals",
-  },
-];
+import useGetSellerMedicinesQuery from "@/hooks/Seller/useGetSellerMedicinesQuery";
+import useUpdateSellerMedicineMutation from "@/hooks/Seller/useUpdateSellerMedicineMutation";
+import useAddSellerMedicineMutation from "@/hooks/Seller/useAddSellerMedicineMutation";
+import useDeleteSellerMedicineMutation from "@/hooks/Seller/useDeleteSellerMedicineMutation";
 
 function MedicinesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [medicines, setMedicines] = useState(initialMedicines);
+
+  const { data: resData, isLoading, refetch } = useGetSellerMedicinesQuery();
+  const inventoryItems = resData?.data || [];
+
+  // Update Medicine Mutation
+  const { mutate: updateMedicine, isPending: isUpdating } = useUpdateSellerMedicineMutation({
+    onSuccess: (res) => {
+      toast.success(res?.message || "Medicine updated successfully!");
+      setIsModalOpen(false);
+      refetch();
+    },
+    onError: (err) => {
+      toast.error(err?.message || "Failed to update medicine.");
+    },
+  });
+
+  // Add Medicine Mutation
+  const { mutate: addMedicine, isPending: isAdding } = useAddSellerMedicineMutation({
+    onSuccess: (res) => {
+      toast.success(res?.message || "Medicine added to inventory successfully!");
+      setIsModalOpen(false);
+      refetch();
+    },
+    onError: (err) => {
+      toast.error(err?.message || "Failed to add medicine.");
+    },
+  });
+
+  // Delete Medicine Mutation
+  const { mutate: deleteMedicine, isPending: isDeleting } = useDeleteSellerMedicineMutation({
+    onSuccess: (res) => {
+      toast.success(res?.message || "Medicine removed from inventory!");
+      setIsDeleteModalOpen(false);
+      setMedicineToDelete(null);
+      refetch();
+    },
+    onError: (err) => {
+      toast.error(err?.message || "Failed to delete medicine.");
+    },
+  });
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
   // Add/Edit Modal states
   const [isModalOpen, setIsModalOpen] = useState(searchParams.get("add") === "true");
   const [editingMedicine, setEditingMedicine] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    generic: "",
-    category: "Painkiller",
+  
+  const initialFormState = {
+    title: "",
+    genericName: "",
+    strength: "",
+    description: "",
+    isFeatured: false,
+    image: "",
+    manufacturer: "",
+    categoriesId: "",
     price: "",
     stock: "",
-    dosage: "Tablet",
-    company: "",
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
 
   // Delete confirmation modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [medicineToDelete, setMedicineToDelete] = useState(null);
 
-  // Clear query parameters on mount to avoid double-opening on refresh
   useEffect(() => {
     if (searchParams.get("add") === "true") {
       router.replace("/seller/medicines");
     }
   }, [router, searchParams]);
 
+  // Format inventory items for MedicineTable component
+  const formattedMedicines = inventoryItems.map((item) => {
+    const med = item.medicines || {};
+    return {
+      id: item.id,
+      medicinesId: item.medicinesId,
+      name: med.title || "Medicine Item",
+      title: med.title || "Medicine Item",
+      generic: med.genericName || "Generic Formula",
+      category: med.categories?.title || "Healthcare",
+      price: Number(item.price || 0),
+      stock: Number(item.stock || 0),
+      dosage: med.strength || med.categories?.title || "Tablet",
+      company: med.manufacturer || "Pharmaceuticals",
+    };
+  });
 
-  // Categories list
-  const categories = [
-    "All",
-    "Painkiller",
-    "Proton Pump Inhibitor",
-    "Antihistamine",
-    "Antibiotic",
-    "Vitamin",
-  ];
+  // Dynamic Categories list
+  const categoriesSet = new Set(formattedMedicines.map((m) => m.category).filter(Boolean));
+  const categories = ["All", ...Array.from(categoriesSet)];
 
   // Filtering Logic
-  const filteredMedicines = medicines.filter((med) => {
+  const filteredMedicines = formattedMedicines.filter((med) => {
     const matchesSearch =
       med.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       med.generic.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -173,7 +137,7 @@ function MedicinesContent() {
   });
 
   // Paginated List
-  const totalPages = Math.ceil(filteredMedicines.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredMedicines.length / itemsPerPage));
   const paginatedMedicines = filteredMedicines.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -188,10 +152,7 @@ function MedicinesContent() {
   // Delete Executor
   const handleDeleteConfirm = () => {
     if (medicineToDelete) {
-      setMedicines((prev) => prev.filter((m) => m.id !== medicineToDelete.id));
-      toast.success(`${medicineToDelete.name} removed successfully.`);
-      setIsDeleteModalOpen(false);
-      setMedicineToDelete(null);
+      deleteMedicine(medicineToDelete.id);
     }
   };
 
@@ -199,13 +160,16 @@ function MedicinesContent() {
   const handleEditClick = (medicine) => {
     setEditingMedicine(medicine);
     setFormData({
-      name: medicine.name,
-      generic: medicine.generic,
-      category: medicine.category,
+      title: medicine.title || medicine.name,
+      genericName: medicine.generic,
+      strength: medicine.dosage,
+      description: "",
+      isFeatured: false,
+      image: "",
+      manufacturer: medicine.company,
+      categoriesId: "",
       price: medicine.price,
       stock: medicine.stock,
-      dosage: medicine.dosage,
-      company: medicine.company,
     });
     setIsModalOpen(true);
   };
@@ -214,53 +178,39 @@ function MedicinesContent() {
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    if (
-      !formData.name ||
-      !formData.generic ||
-      !formData.price ||
-      !formData.stock ||
-      !formData.company
-    ) {
-      toast.error("Please fill in all required fields.");
+    if (!formData.price || !formData.stock) {
+      toast.error("Please provide valid price and stock values.");
       return;
     }
 
     if (editingMedicine) {
-      // Edit mode
-      setMedicines((prev) =>
-        prev.map((m) =>
-          m.id === editingMedicine.id
-            ? {
-                ...m,
-                name: formData.name,
-                generic: formData.generic,
-                category: formData.category,
-                price: parseFloat(formData.price),
-                stock: parseInt(formData.stock),
-                dosage: formData.dosage,
-                company: formData.company,
-              }
-            : m
-        )
-      );
-      toast.success(`${formData.name} updated successfully.`);
+      updateMedicine({
+        id: editingMedicine.id,
+        data: {
+          price: Number(formData.price),
+          stock: Number(formData.stock),
+          title: formData.title,
+        },
+      });
     } else {
-      // Create mode
-      const newMed = {
-        id: `MED-00${medicines.length + 1}`,
-        name: formData.name,
-        generic: formData.generic,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
-        dosage: formData.dosage,
-        company: formData.company,
-      };
-      setMedicines((prev) => [newMed, ...prev]);
-      toast.success(`${formData.name} added to inventory.`);
-    }
+      if (!formData.title || !formData.genericName || !formData.categoriesId) {
+        toast.error("Please fill in all required fields.");
+        return;
+      }
 
-    setIsModalOpen(false);
+      addMedicine({
+        title: formData.title,
+        genericName: formData.genericName,
+        strength: formData.strength,
+        description: formData.description,
+        isFeatured: !!formData.isFeatured,
+        image: formData.image || "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=600",
+        manufacturer: formData.manufacturer,
+        categoriesId: formData.categoriesId,
+        price: Number(formData.price),
+        stock: Number(formData.stock),
+      });
+    }
   };
 
   return (
@@ -282,15 +232,7 @@ function MedicinesContent() {
           icon={<Plus size={18} />}
           onClick={() => {
             setEditingMedicine(null);
-            setFormData({
-              name: "",
-              generic: "",
-              category: "Painkiller",
-              price: "",
-              stock: "",
-              dosage: "Tablet",
-              company: "",
-            });
+            setFormData(initialFormState);
             setIsModalOpen(true);
           }}
           className="cursor-pointer font-medium w-full sm:w-auto text-center justify-center shrink-0"
@@ -338,22 +280,35 @@ function MedicinesContent() {
         </div>
       </div>
 
+      {/* Loading Skeleton */}
+      {isLoading && (
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 animate-pulse space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-14 bg-slate-100 dark:bg-slate-800 rounded-xl" />
+          ))}
+        </div>
+      )}
+
       {/* Inventory Table Component */}
-      <MedicineTable
-        filteredMedicines={paginatedMedicines}
-        onEdit={handleEditClick}
-        onDelete={handleDeleteTrigger}
-      />
+      {!isLoading && (
+        <MedicineTable
+          filteredMedicines={paginatedMedicines}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteTrigger}
+        />
+      )}
 
       {/* Reusable Pagination Component */}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={filteredMedicines.length}
-        itemsPerPage={itemsPerPage}
-        onPageChange={setCurrentPage}
-        itemName="medicines"
-      />
+      {!isLoading && filteredMedicines.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredMedicines.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          itemName="medicines"
+        />
+      )}
 
       {/* Add / Edit Medicine Modal Component */}
       <AddEditMedicineModal
@@ -363,7 +318,7 @@ function MedicinesContent() {
         formData={formData}
         setFormData={setFormData}
         editingMedicine={editingMedicine}
-        categories={categories}
+        isPending={isUpdating || isAdding}
       />
 
       {/* Custom Delete Confirmation Modal */}
@@ -375,6 +330,7 @@ function MedicinesContent() {
         }}
         onConfirm={handleDeleteConfirm}
         medicineName={medicineToDelete ? medicineToDelete.name : ""}
+        isPending={isDeleting}
       />
     </div>
   );

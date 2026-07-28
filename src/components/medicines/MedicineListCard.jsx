@@ -51,20 +51,20 @@ export default function MedicineListCard({ med }) {
       {/* Middle: Details */}
       <div className="flex-1 space-y-2 text-center sm:text-left">
         <div className="flex items-center flex-wrap gap-2.5 justify-center sm:justify-start">
-          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
             {med.manufacturer || med.genericName || "Pharmaceuticals"}
           </span>
           <span className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-slate-700"></span>
-          <span className="text-xs font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full dark:text-teal-400 dark:bg-teal-950/40 border border-teal-200/50 dark:border-teal-900">
+          <span className="text-xs font-medium text-teal-700 bg-teal-50 px-3 py-1 rounded-full dark:text-teal-400 dark:bg-teal-950/40 border border-teal-200/50 dark:border-teal-900">
             {med.categories?.title || "Medicine"}
           </span>
         </div>
 
-        <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white leading-tight">
           {med.title}
         </h3>
 
-        <p className="text-base font-semibold text-slate-600 dark:text-slate-350">
+        <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
           {med.genericName} • {med.strength}
         </p>
       </div>
@@ -72,7 +72,7 @@ export default function MedicineListCard({ med }) {
       {/* Right: Price & Actions */}
       <div className="sm:pl-6 sm:border-l border-slate-100 dark:border-slate-800 flex sm:flex-col items-center justify-between sm:justify-center gap-4 sm:gap-3 w-full sm:w-48 shrink-0 pt-4 sm:pt-0 border-t sm:border-t-0">
         <div className="text-right sm:text-center">
-          <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+          <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
             {priceDisplay}
           </span>
         </div>
@@ -83,7 +83,7 @@ export default function MedicineListCard({ med }) {
             variant="primary"
             size="md"
             icon={<ShoppingCart className="h-4 w-4" />}
-            className="h-10 px-4 rounded-xl text-xs font-bold cursor-pointer"
+            className="h-10 px-4 rounded-xl text-xs font-medium cursor-pointer"
           >
             Add
           </Button>
@@ -91,7 +91,7 @@ export default function MedicineListCard({ med }) {
             <Button
               variant="outline"
               size="md"
-              className="h-10 px-4 rounded-xl text-xs font-bold border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
+              className="h-10 px-4 rounded-xl text-xs font-medium border-slate-200 text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
             >
               Details
             </Button>
