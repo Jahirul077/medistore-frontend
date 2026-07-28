@@ -78,7 +78,7 @@ export default function CheckoutContainer() {
       const payloadItems = cartItems.map((item) => ({
         sellerInventoryId: item.sellerInventoryId || item.id,
         SellerInventoryId: item.sellerInventoryId || item.id,
-        quantity: Number(item.quantity) || 1,
+        quantity: item.quantity,
       }));
 
       // Step 1: Create Order in backend
