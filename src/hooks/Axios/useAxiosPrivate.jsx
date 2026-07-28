@@ -56,15 +56,24 @@ axiosInstance.interceptors.response.use(
     }
 
     const status = response.status;
+    const errorMessage = String(response.data?.message || "").toLowerCase();
 
-    if (status === 401) {
-      toast.error("Session expired. Please log in again.");
-      removeLocalStorage("MEDISTORE_ACCESS_TOKEN");
-      removeSessionStorage("MEDISTORE_ACCESS_TOKEN");
-      removeLocalStorage("MEDISTORE_USER");
+    const isUserNotExistError =
+      errorMessage.includes("user does not exist") ||
+      errorMessage.includes("user not found") ||
+      errorMessage.includes("user invalid") ||
+      errorMessage.includes("invalid user") ||
+      errorMessage.includes("account not found");
 
-      if (typeof window !== "undefined" && !window.location.pathname.includes("/auth/login")) {
-        window.location.href = "/auth/login";
+    if (status === 401 || isUserNotExistError) {
+      toast.error(response.data?.message || "Session expired or user does not exist. Logging out...");
+      
+      if (typeof window !== "undefined") {
+        localStorage.clear();
+        sessionStorage.clear();
+        if (!window.location.pathname.includes("/auth/login")) {
+          window.location.href = "/auth/login";
+        }
       }
 
       return Promise.reject(error);
@@ -81,7 +90,7 @@ axiosInstance.interceptors.response.use(
     }
 
     if (status === 404) {
-      toast.error("Requested resource not found.");
+      toast.error(response.data?.message || "Requested resource not found.");
       return Promise.reject(error);
     }
 
