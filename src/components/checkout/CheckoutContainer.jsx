@@ -16,7 +16,7 @@ import useCreatePaymentMutation from "@/hooks/Payment/useCreatePaymentMutation";
 export default function CheckoutContainer() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const rawCartItems = useSelector((state) => state.cart?.cartItems);
+  const rawCartItems = useSelector((state) => state.cart?.items || state.cart?.cartItems);
   const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
   const [paymentMethod, setPaymentMethod] = useState("card");
 
